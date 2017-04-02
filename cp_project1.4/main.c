@@ -8,10 +8,12 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN])
   char *token;
   char delim[2] = " ";
 
-  for (int i = 0; i < DEPTH; i++)
-  {
-    strcpy(pathname[i], "\0" );
-  }
+  // for (int i = 0; i < DEPTH; i++)
+  // {
+  //   strcpy(pathname[i], "\0" );
+  // }
+
+  sanitizePathname(pathname);
 
   printf("-------------------------------------------\n");
   //GET INPUT
@@ -126,6 +128,7 @@ int main (int argc, char *argv[])
 //enter quit when done
 while (1)
 {
+  sanitizePathname(pathname);
   getInput(cmd, pathname);
   if (!strcmp(cmd, "ls"))
     ls(fd, running, pathname);
