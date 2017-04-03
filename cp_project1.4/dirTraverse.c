@@ -377,10 +377,10 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
 
 }
 
-// void mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
-// {
-//
-// }
+void mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
+{
+  
+}
 
 //Precondition: pip is a dir
 void my_mkdir(PROC *running, MINODE *pip, char *new_name)
@@ -395,5 +395,53 @@ void my_mkdir(PROC *running, MINODE *pip, char *new_name)
     return;
   }
 
+  //"ALLOCATE" MIP
+  MINODE *mip = iget(pip->dev, ino);
+
+  //INIT CONTENTS OF MIP
+  INODE *ip = &(mip->inode);
+  ip->i_mode = 040755;      //DIR type and permissions
+  ip->i_uid = running->uid; //user's id
+  ip->i_gid = 0;            //Group id MAY NEED TO CHANGE
+  ip->i_size = BLKSIZE;
+  ip->i_links_count = 2;    //links for . and ..
+  ip->i_atime = time(0L);   //set to current time
+  ip->i_ctime = ip->i_atime;//set to current time
+  ip->i_mtime = ip->i_atime;//set to current time
+  ip->i_blocks = 2;         //Linux: blocks count in 512-bytes chunks
+  ip->i_block[0] = bno;     //Will need for dir entries . and ..
+  for (int i = 1; i < 15; i++)
+  {
+    ip->i_block[i] = 0;     //Unused blocks
+  }
+  mip->dirty = 1;           //mark dirty (so it will be written to mem)
+
+  //WRITE MIP BACK TO MEMORY (DEALLOCATE IT)
+  iput(mip);
+
+  //INIT THE NEW DATABLOCK (I_BLOCK[0])
+  char dp_buf[BLKSIZE];
+  DIR *dp = (DIR *)dp_buf;
+  char *cp = NULL;
+
+  //INIT THE FIRST ENTRY "."
+  dp->inode = ino;
+  dp->rec_len = 12;
+  dp->name_len = 1;
+  cp = (char *)(dp->name);
+  *cp = '.';
+
+  //INIT SECOND ENTRY ".."
+  dp = (DIR *)( (char *)dp + dp->rec_len);
+  dp->inode = pip->ino;
+  dp->rec_len = 1012;           //remaining space in block
+  dp->name_len = 2;
+  cp = (char *)(dp->name);
+  *cp = '.';
+  cp++;
+  *cp = '.';
+
+  //WRITE NEW DATABLOCK BACK TO MEMORY
+  put_block(pip->dev, bno, dp_buf);
 
 }

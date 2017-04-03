@@ -10,6 +10,7 @@
 #include <ext2fs/ext2_fs.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <time.h>
 
 typedef unsigned char  u8;
 typedef unsigned short u16;
@@ -77,6 +78,7 @@ int search (int dev, MINODE *mip, char *name);
 int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index);
 void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+void my_mkdir(PROC *running, MINODE *pip, char *new_name);
 
 // int pwd (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 // int pwdHelper(int dev, char pathname[DEPTH][NAMELEN], MINODE *mip);
@@ -91,6 +93,8 @@ int set_bit(char *buf, int bit);
 int clr_bit(char *buf, int bit);
 int decFreeBlocks(int dev);
 int incFreeBlocks(int dev);
+int decFreeInodes(int dev);
+int incFreeInodes(int dev);
 int balloc(int dev);
 int ialloc(int dev);
 int bdealloc(int dev, int bno);

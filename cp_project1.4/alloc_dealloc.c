@@ -60,6 +60,41 @@ int incFreeBlocks(int dev)
   printf("free blocks in gd = %d\n", gp->bg_free_blocks_count);
 }
 
+int decFreeInodes(int dev)
+{
+  char buf[BLKSIZE];
+
+  // dec free blocks count in SUPER and GD
+  get_block(dev, 1, buf);
+  SUPER *sp = (SUPER *)buf;
+  sp->s_free_inodes_count--;
+  put_block(dev, 1, buf);
+  printf("free blocks in super = %d\n", sp->s_free_inodes_count);
+
+  get_block(dev, 2, buf);
+  GD *gp = (GD *)buf;
+  gp->bg_free_inodes_count--;
+  put_block(dev, 2, buf);
+  printf("free blocks in gd = %d\n", gp->bg_free_inodes_count);
+}
+
+int incFreeInodes(int dev)
+{
+  char buf[BLKSIZE];
+
+  // dec free blocks count in SUPER and GD
+  get_block(dev, 1, buf);
+  SUPER *sp = (SUPER *)buf;
+  sp->s_free_inodes_count++;
+  put_block(dev, 1, buf);
+  printf("free blocks in super = %d\n", sp->s_free_inodes_count);
+
+  get_block(dev, 2, buf);
+  GD *gp = (GD *)buf;
+  gp->bg_free_inodes_count++;
+  put_block(dev, 2, buf);
+  printf("free blocks in gd = %d\n", gp->bg_free_inodes_count);
+}
 /**************************************************
 Precondition :: correct dev
 Info :: Allocates a datablock and returns bno number.
@@ -156,7 +191,7 @@ int ialloc(int dev)
     {
       //SET BIT AND RETURN BLOCK NUMBER
        set_bit(buf,i);
-       decFreeBlocks(dev);
+       decFreeInodes(dev);
 
        put_block(dev, imap, buf);
 
@@ -243,6 +278,6 @@ int idealloc(int dev, int ino)
   clr_bit(buf, ino - 1);
   // WRITE BUF BACK TO IMAP ON DEV
   put_block(dev, imap, buf);
-  incFreeBlocks(dev);
+  incFreeInodes(dev);
   return 1;
 }
