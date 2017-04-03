@@ -383,8 +383,17 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
 // }
 
 //Precondition: pip is a dir
-// void my_mkdir(PROC *running, MINODE *pip, char *new_name)
-// {
-//   //GET INO AND BNO (AND CHECK IF SPACE IS AVAILABLE)
-//
-// }
+void my_mkdir(PROC *running, MINODE *pip, char *new_name)
+{
+  //GET INO AND BNO (AND CHECK IF SPACE IS AVAILABLE)
+  int ino = ialloc(pip->dev);
+  int bno = balloc(pip->dev);
+
+  if (bno == 0 | ino == 0)
+  {
+    printf("my_mkdir(): bno = %d, ino = %d", bno, ino);
+    return;
+  }
+
+
+}

@@ -42,6 +42,24 @@ int decFreeBlocks(int dev)
   printf("free blocks in gd = %d\n", gp->bg_free_blocks_count);
 }
 
+int incFreeBlocks(int dev)
+{
+  char buf[BLKSIZE];
+
+  // dec free blocks count in SUPER and GD
+  get_block(dev, 1, buf);
+  SUPER *sp = (SUPER *)buf;
+  sp->s_free_blocks_count++;
+  put_block(dev, 1, buf);
+  printf("free blocks in super = %d\n", sp->s_free_blocks_count);
+
+  get_block(dev, 2, buf);
+  GD *gp = (GD *)buf;
+  gp->bg_free_blocks_count++;
+  put_block(dev, 2, buf);
+  printf("free blocks in gd = %d\n", gp->bg_free_blocks_count);
+}
+
 /**************************************************
 Precondition :: correct dev
 Info :: Allocates a datablock and returns bno number.
@@ -124,15 +142,15 @@ int ialloc(int dev)
   get_block(dev, 2, buf);
   gp = (GD *)buf;
 
-  // GET BMAP BLOCK NUMBER
-  int bmap = gp->bg_block_bitmap;
-  printf("bmap = %d\n", bmap);
+  // GET IMAP BLOCK NUMBER
+  int imap = gp->bg_inode_bitmap;
+  printf("bmap = %d\n", imap);
 
   // READ inode_bitmap BLOCK
-  get_block(dev, bmap, buf);
+  get_block(dev, imap, buf);
 
   //CHECK FOR FREE BLOCK
-  for (int i=0; i < nblocks; i++)
+  for (int i=0; i < ninodes; i++)
   {
     if (tst_bit(buf, i)==0)
     {
@@ -140,11 +158,91 @@ int ialloc(int dev)
        set_bit(buf,i);
        decFreeBlocks(dev);
 
-       put_block(dev, bmap, buf);
+       put_block(dev, imap, buf);
 
        return i+1;
     }
   }
-  printf("ialloc(): no more free blocks\n");
+  printf("ialloc(): no more free inodes\n");
   return 0;
+}
+/**************************************************
+Precondition ::
+Info :: clears the bit mapped to the block number
+in the bmap
+**************************************************/
+int bdealloc(int dev, int bno)
+{
+  char buf[BLKSIZE] = {'\0'};
+
+  // READ SUPER BLOCK
+  char sp_buf[BLKSIZE] = {'\0'};
+  get_block(dev, 1, sp_buf);
+  SUPER *sp = (SUPER *)sp_buf;
+
+  //GET NUMBER INODES
+  int ninodes = sp->s_inodes_count;
+  int nblocks = sp->s_blocks_count;
+  int nfreeInodes = sp->s_free_inodes_count;
+  int nfreeBlocks = sp->s_free_blocks_count;
+  printf("ninodes=%d nblocks=%d nfreeInodes=%d nfreeBlocks=%d\n",
+  ninodes, nblocks, nfreeInodes, nfreeBlocks);
+
+  // READ GROUP DESCIPTOR
+  GD *gp = NULL;
+  get_block(dev, 2, buf);
+  gp = (GD *)buf;
+
+  // GET IMAP BLOCK NUMBER
+  int bmap = gp->bg_block_bitmap;
+  printf("bmap = %d\n", bmap);
+
+  // READ inode_bitmap BLOCK
+  get_block(dev, bmap, buf);
+  //CLEAR BIT IN BUF CONTAINING IMAP
+  clr_bit(buf, bno - 1);
+  // WRITE BUF BACK TO IMAP ON DEV
+  put_block(dev, bmap, buf);
+  incFreeBlocks(dev);
+  return 1;
+}
+/**************************************************
+Precondition ::
+Info :: clears the bit mapped to the inode number
+in the imap
+**************************************************/
+int idealloc(int dev, int ino)
+{
+  char buf[BLKSIZE] = {'\0'};
+
+  // READ SUPER BLOCK
+  char sp_buf[BLKSIZE] = {'\0'};
+  get_block(dev, 1, sp_buf);
+  SUPER *sp = (SUPER *)sp_buf;
+
+  //GET NUMBER INODES
+  int ninodes = sp->s_inodes_count;
+  int nblocks = sp->s_blocks_count;
+  int nfreeInodes = sp->s_free_inodes_count;
+  int nfreeBlocks = sp->s_free_blocks_count;
+  printf("ninodes=%d nblocks=%d nfreeInodes=%d nfreeBlocks=%d\n",
+  ninodes, nblocks, nfreeInodes, nfreeBlocks);
+
+  // READ GROUP DESCIPTOR
+  GD *gp = NULL;
+  get_block(dev, 2, buf);
+  gp = (GD *)buf;
+
+  // GET IMAP BLOCK NUMBER
+  int imap = gp->bg_inode_bitmap;
+  printf("imap = %d\n", imap);
+
+  // READ inode_bitmap BLOCK
+  get_block(dev, imap, buf);
+  //CLEAR BIT IN BUF CONTAINING IMAP
+  clr_bit(buf, ino - 1);
+  // WRITE BUF BACK TO IMAP ON DEV
+  put_block(dev, imap, buf);
+  incFreeBlocks(dev);
+  return 1;
 }

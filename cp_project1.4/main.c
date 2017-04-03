@@ -93,7 +93,12 @@ int main (int argc, char *argv[])
       // getNameFromIno(fd, testNum, name);  //A test
       // printf("Name found = %s\n", name);
       int allocated_bno = balloc(fd);
-      printf("Allocated block %d\n", allocated_bno);
+      printf("Allocated block number %d\n", allocated_bno);
+      int allocated_ino = ialloc(fd);
+      printf("Allocated inode number %d\n", allocated_ino);
+
+      idealloc(fd, allocated_ino);
+      bdealloc(fd, allocated_bno);
     }
     else if (!strcmp(cmd, "pwd"))
       pwd(fd, running->cwd);

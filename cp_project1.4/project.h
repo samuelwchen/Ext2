@@ -89,8 +89,12 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN]);
 int tst_bit(char *buf, int bit);
 int set_bit(char *buf, int bit);
 int clr_bit(char *buf, int bit);
-
-
+int decFreeBlocks(int dev);
+int incFreeBlocks(int dev);
+int balloc(int dev);
+int ialloc(int dev);
+int bdealloc(int dev, int bno);
+int idealloc(int dev, int ino);
 // found MAIN.C
 void quit(void);
 
