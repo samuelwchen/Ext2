@@ -7,8 +7,8 @@ Info :: Resets all pathname array to ''\0'
 void sanitizePathname(char pathname[DEPTH][NAMELEN])
 {
   for (int i = 0; i < DEPTH; i++)
-    pathname[i][0] = '\0';
-    //strcpy(pathname[i], "\0");
+    //pathname[i][0] = '\0';
+    strcpy(pathname[i], "\0");
 }
 
 /**************************************************
@@ -157,7 +157,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
   // convert pathname to (dev, ino);
   // get a MINODE *mip pointing at a minode[ ] with (dev, ino);
-  if (!(pathname[0][0] == '/0'))
+  if (!(pathname[0][0] == '\0'))
   {
     ino = getino(mip->dev, running, pathname);
     if (ino == 0)

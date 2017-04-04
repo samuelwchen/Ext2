@@ -167,10 +167,7 @@ int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN])
      mip = iget(dev, 2);
   else
      mip = iget(running->cwd->dev, running->cwd->ino);
-  //printInode(&mip->inode);
-  // strcpy(buf, pathname);
-  // tokenize(buf); // n = number of token strings
-  //
+
   for (int i=0; strcmp(pathname[i], "\0") != 0; i++)
   {
       if ( !strcmp(pathname[i], "/") )
