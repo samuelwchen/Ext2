@@ -229,25 +229,29 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 }
 
 
-// int pwd (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
-// {
-//   sanitizePathname(pathname);
-//
-//   MINODE *mip = running->cwd;
-//
-//   int i = pwdHelper(dev, pathname, mip);
-//
-// }
-//
-// int pwdHelper(int dev, char pathname[DEPTH][NAMELEN], MINODE *mip)
-// {
-//   if(mip->ino == 2)
-//   {
-//     strcpy(pathname[0], "/");
-//     return 1;         // returning 1 because output tells where in pathname it needs to go
-//   }
-//
-//
-//   int i = pwdHelper(dev, pathname, mip);
-//
-// }
+int pwd (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
+{
+  sanitizePathname(pathname);
+
+  MINODE *mip = running->cwd;
+
+  int i = pwdHelper(dev, pathname, mip);
+
+}
+
+int pwdHelper(int dev, char pathname[DEPTH][NAMELEN], MINODE *mip)
+{
+  if(mip->ino == 2)
+  {
+    strcpy(pathname[0], "/");
+    return 1;         // returning 1 because output tells where in pathname it needs to go
+  }
+
+  int ino = search (dev, mip, "..");
+  mip = iget(dev, ino);
+
+  int i = pwdHelper(dev, pathname, mip);
+  strcpy(pathname[i], mip->inode)
+
+  return i++;
+}
