@@ -3,28 +3,20 @@
 void getInput(char cmd[64], char pathname[DEPTH][NAMELEN])
 {
   //char cmd[64], pathname[DEPTH][NAMELEN];
-  char input[BLKSIZE];
-  char line[128];
-  char *token;
+  char input[BLKSIZE] = {'\0'};
+  char line[128] = {'\0'};
+  char *token = NULL;
   char delim[2] = " ";
 
-  for (int i = 0; i < DEPTH; i++)
-  {
-    strcpy(pathname[i], "\0" );
-  }
+  sanitizePathname(pathname);
 
   printf("-------------------------------------------\n");
+
   //GET INPUT
   printf("Enter command [pathname]: ");
-  //scanf("%s", input);
   fgets(line, 128, stdin );
   sscanf(line, "%s %s", cmd, input);
-// printf("path = %s\n", input);
-// printf("press any key\n");
-// getchar();
-  // token = strtok(input, delim);
-  // strcpy(cmd, token);
-  //parse input into pathname
+
   if (input[0] == '\0')
   {
     printf("input null\n");
@@ -77,7 +69,6 @@ int main (int argc, char *argv[])
 
   mount_root(fd, &root);
 
-  //may need to change later,
   //Need to SET FIRST PROCCESS and point running at it
   proc[0].cwd = root;
   //what do we do about the pid and next and etc?
@@ -85,69 +76,20 @@ int main (int argc, char *argv[])
 
   MINODE *mip = iget(fd, 2);
   printInode(&(mip->inode));
-  //
-  // //GET INPUT
-  // printf("Enter pathname ");
-  // scanf("%s", input);
-  //
-  // printf("You entered: %s\n", input);
-  // parse(input, pathname);
-  //
-  // for (int i = 0; pathname[i][0] != '\0'; i++)
-  // {
-  //   printf("pathname[%d] = %s\n", i, pathname[i]);
-  // }
 
-  //NOTE: Will we need to change fd to running->cwd->dev at some point?
-  // int tempino = getino(fd, running, pathname);
-  // printf("Back in main, ino = %d!\n", tempino);
-  // if (tempino != 0)
-  //   printInode( &(iget(fd, tempino)->inode) );
-  //search(fd, root, pathname[1]);
-  // printf("%d of minode array dirty", minode_table[12].dirty);
-  // printf("hello my FAVORITEST michelle\n");
-/*
-  ls(fd, running, pathname);
-
-  //GET INPUT
-  printf("Enter pathname ");
-  scanf("%s", input);
-
-  printf("You entered: %s\n", input);
-  parse(input, pathname);
-  cd(fd, running, pathname);
-*/
-  // //GET INPUT
-  // printf("Enter pathname ");
-  // scanf("%s", input);
-  //
-  // printf("You entered: %s\n", input);
-  // parse(input, pathname);
-//enter quit when done
-while (1)
-{
-  getInput(cmd, pathname);
-  if (!strcmp(cmd, "ls"))
-    ls(fd, running, pathname);
-  if (!strcmp(cmd, "cd"))
-    cd(fd, running, pathname);
-  if (!strcmp(cmd, "quit"))
-    quit();
-}
-  // getInput(cmd, pathname);
-  // if (!strcmp(cmd, "ls"))
-  //   ls(fd, running, pathname);
-  // if (!strcmp(cmd, "cd"))
-  //   cd(fd, running, pathname);
-  // if (!strcmp(cmd, "quit"))
-  //   quit();
-
-  //ls(fd, running, pathname);
+  while (1)
+  {
+    sanitizePathname(pathname);
+    getInput(cmd, pathname);
+    if (!strcmp(cmd, "ls"))
+      ls(fd, running, pathname);
+    if (!strcmp(cmd, "cd"))
+      cd(fd, running, pathname);
+    if (!strcmp(cmd, "quit"))
+      quit();
+  }
 
   quit();
-
-
-
 
 }
 

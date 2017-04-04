@@ -71,8 +71,10 @@ void printSuperBlock(int fd);
 void printInode(INODE* ipCur);
 
 // found in DIR_TRAVERSE.C
+void sanitizePathname(char pathname[DEPTH][NAMELEN]);
 void parse(char input[STRLEN], char pathname[DEPTH][NAMELEN]);
 int search (int dev, MINODE *mip, char *name);
+void searchHelper(int dev, int level_indirection, int block_num, int inode_table_index);
 void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 // found MAIN.C
