@@ -1,6 +1,6 @@
 #include "project.h"
 
-void getInput(char cmd[64], char pathname[DEPTH][NAMELEN])
+void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], int dev, PROC *running)
 {
   //char cmd[64], pathname[DEPTH][NAMELEN];
   char input[BLKSIZE] = {'\0'};
@@ -13,6 +13,7 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN])
   printf("-------------------------------------------\n");
 
   //GET INPUT
+  pwd(dev, running->cwd);
   printf("Enter command [pathname]: ");
   fgets(line, 128, stdin );
   sscanf(line, "%s %s", cmd, input);
@@ -80,13 +81,27 @@ int main (int argc, char *argv[])
   while (1)
   {
     sanitizePathname(pathname);
-    getInput(cmd, pathname);
-    if (!strcmp(cmd, "ls"))
+    getInput(cmd, pathname, fd, running);
+    if (!strcmp(cmd, "test"))
+    {
+      int testNum = 2;
+      printf("enter inode number you wish to look for:: ");
+      scanf("%d", &testNum);
+      //strcpy(name, getNameFromIno(fd, testNum));  //A test
+      char name[NAMELEN] = {'\0'};
+      getNameFromIno(fd, testNum, name);  //A test
+      printf("Name found = %s\n", name);
+    }
+    else if (!strcmp(cmd, "pwd"))
+      pwd(fd, running->cwd);
+    else if (!strcmp(cmd, "ls"))
       ls(fd, running, pathname);
-    if (!strcmp(cmd, "cd"))
+    else if (!strcmp(cmd, "cd"))
       cd(fd, running, pathname);
-    if (!strcmp(cmd, "quit"))
+    else if (!strcmp(cmd, "quit"))
       quit();
+
+
   }
 
   quit();
