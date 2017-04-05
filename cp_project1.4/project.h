@@ -85,6 +85,12 @@ void pwdHelper(int dev, MINODE* mip);
 int getNameFromInoHelper(int dev, int level_indirection, int block_num, int ino, char fileName[NAMELEN]);
 void getNameFromIno(int dev, int ino, char fileName[NAMELEN]);
 
+//found alloc_dealloc.c
+int tst_bit(char *buf, int bit);
+int set_bit(char *buf, int bit);
+int clr_bit(char *buf, int bit);
+
+
 // found MAIN.C
 void quit(void);
 

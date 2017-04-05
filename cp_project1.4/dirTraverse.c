@@ -112,6 +112,7 @@ int search (int dev, MINODE *mip, char *name)
 Precondition :: all ints must of non-negative.
 Info :: Gets called by search.  recursively searches through
 indirect blocks until block number of interest is found.
+
 **************************************************/
 int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index)
 {
@@ -134,10 +135,11 @@ int searchHelper(int dev, int level_indirection, int block_num, int inode_table_
     if (*pIndirect_blk == 0)
       return 0;
     block_num = searchHelper(dev, level_indirection-1, *pIndirect_blk, inode_table_index);
-    pIndirect_blk++;
     if (block_num != 0)
       return block_num;
+    pIndirect_blk++;
   }
+  return 0;
 }
 
 /**************************************************
@@ -243,7 +245,7 @@ void pwdHelper(int dev, MINODE* mip)
   if (mip->ino == 2)
   {
     //fflush(stdout);
-    printf("/");
+    printf("Current Directory = /");
     return;
   }
   // GETTING PARENT mip
@@ -374,3 +376,15 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
   return;
 
 }
+
+// void mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
+// {
+//
+// }
+
+//Precondition: pip is a dir
+// void my_mkdir(PROC *running, MINODE *pip, char *new_name)
+// {
+//   //GET INO AND BNO (AND CHECK IF SPACE IS AVAILABLE)
+//
+// }

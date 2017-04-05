@@ -13,7 +13,7 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], int dev, PROC *runnin
   printf("-------------------------------------------\n");
 
   //GET INPUT
-  pwd(dev, running->cwd);
+  //pwd(dev, running->cwd);
   printf("Enter command [pathname]: ");
   fgets(line, 128, stdin );
   sscanf(line, "%s %s", cmd, input);
@@ -81,16 +81,19 @@ int main (int argc, char *argv[])
   while (1)
   {
     sanitizePathname(pathname);
+    //pwd(fd, running->cwd);
     getInput(cmd, pathname, fd, running);
     if (!strcmp(cmd, "test"))
     {
-      int testNum = 2;
-      printf("enter inode number you wish to look for:: ");
-      scanf("%d", &testNum);
-      //strcpy(name, getNameFromIno(fd, testNum));  //A test
-      char name[NAMELEN] = {'\0'};
-      getNameFromIno(fd, testNum, name);  //A test
-      printf("Name found = %s\n", name);
+      // int testNum = 2;
+      // printf("enter inode number you wish to look for:: ");
+      // scanf("%d", &testNum);
+      // //strcpy(name, getNameFromIno(fd, testNum));  //A test
+      // char name[NAMELEN] = {'\0'};
+      // getNameFromIno(fd, testNum, name);  //A test
+      // printf("Name found = %s\n", name);
+      int allocated_bno = balloc(fd);
+      printf("Allocated block %d\n", allocated_bno);
     }
     else if (!strcmp(cmd, "pwd"))
       pwd(fd, running->cwd);
