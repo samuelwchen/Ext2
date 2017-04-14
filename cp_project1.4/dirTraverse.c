@@ -112,7 +112,6 @@ int search (int dev, MINODE *mip, char *name)
 Precondition :: all ints must of non-negative.
 Info :: Gets called by search.  recursively searches through
 indirect blocks until block number of interest is found.
-
 **************************************************/
 int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index)
 {
@@ -174,6 +173,8 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
   char buf[BLKSIZE];
   int i = 0, j = 0;
+  char rwx[2][9] = {  '-', '-', '-', '-', '-', '-', '-', '-', '-',
+                      'r', 'w', 'x', 'r', 'w', 'x', 'r', 'w', 'x' };
 
   printf("==================== ls ====================\n");
   while(mip->inode.i_block[i] != 0 && i < 15)
@@ -181,6 +182,56 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     get_block(dev, mip->inode.i_block[i], buf);
     dp = (DIR *)buf;
 
+    // DETERMINING READ, WRITE, EXECUTABLE PERMISSIONS
+
+
+    //printf("Information for %s\n",argv[1]);
+        printf("---------------------------\n");
+        // printf("File Size: \t\t%d bytes\n",mip->inode.st_size);
+        // printf("Number of Links: \t%d\n",mip->inode.st_nlink);
+        // printf("File inode: \t\t%d\n",mip->inode.st_ino);
+
+        printf("File Permissions: \t");
+        printf( (S_ISDIR(mip->inode.i_mode)) ? "d" : "-");
+        printf( (mip->inode.i_mode & S_IRUSR) ? "r" : "-");
+        printf( (mip->inode.i_mode & S_IWUSR) ? "w" : "-");
+        printf( (mip->inode.i_mode & S_IXUSR) ? "x" : "-");
+        printf( (mip->inode.i_mode & S_IRGRP) ? "r" : "-");
+        printf( (mip->inode.i_mode & S_IWGRP) ? "w" : "-");
+        printf( (mip->inode.i_mode & S_IXGRP) ? "x" : "-");
+        printf( (mip->inode.i_mode & S_IROTH) ? "r" : "-");
+        printf( (mip->inode.i_mode & S_IWOTH) ? "w" : "-");
+        printf( (mip->inode.i_mode & S_IXOTH) ? "x" : "-");
+        printf("\n\n");
+
+        printf("The file %s a symbolic link\n", (S_ISLNK(mip->inode.i_mode)) ? "is" : "is not");
+
+
+
+    // char rwxBuf[2] = {'\0'};
+//     u16 cp = (mip->inode.i_mode);
+//         printf("we are here, cp = %hu\n", (int)cp);
+// char tempBuf[2];
+//         itoa(cp, tempBuf, 10);
+//         printf("we are here again with i_mode = %hu\n", mip->inode.i_mode);
+    //for (int i = 0; i < 16; i++)
+    //   rwxBuf[i] =
+    // rwxBuf[0] = cp;
+    // printf("we are here 2, cp = %hu\n", (int)cp);
+    // cp++;
+    // rwxBuf[1] = cp;
+  // printf("we are here, rwxBuf = %c   %c\n", rwxBuf[0],rwxBuf[1]);
+  // printf("in number %hu", (u16*)rwxBuf);
+    // //strncpy (rwxBuf, (char*)(mip->inode.i_mode), 2);
+    // int test = 0;
+    //  for (int i = 0;  i < 16; i++)
+    // {
+    //   test = tst_bit(tempBuf, i);
+    //     printf("testing %d", test);
+    // }
+    // //   printf ("testing %c", rwx[ ][i]);
+
+    // PRINTING FILE/DIR NAME
     while (dp < (DIR*)(buf + BLKSIZE))
     {
       for (j = 0; j < dp->name_len; j++)
@@ -188,7 +239,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
         dirName[j] = dp->name[j];
       }
       dirName[j] = '\0';
-      printf("%s\n", dirName);
+      printf("%hu %s\n", mip->inode.i_mode, dirName);
 
       dp = (DIR*)((char*)dp + dp->rec_len);
     }

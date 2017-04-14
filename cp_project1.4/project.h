@@ -57,9 +57,7 @@ typedef struct proc{
 
 MINODE minode_table[NMINODE];        // global minode[ ] array
 
-// found in HELPER.C
-int get_block(int fd, int blk, char buf[ ]);
-int put_block(int dev, int blk, char buf[ ]);
+// found in HELPER.C(char*)lk, char buf[ ]);
 void init (PROC proc[NPROC], MINODE *root);
 void mount_root(int dev, MINODE **root);
 int get_itable_begin(int dev, GD *gp);
