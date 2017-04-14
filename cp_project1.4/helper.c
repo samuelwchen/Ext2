@@ -2,7 +2,7 @@
 
 int get_block(int fd, int blk, char buf[ ])
 {
-  printf("get_block()\n");
+  debugMode("get_block()\n");
   lseek(fd, (long)blk*BLKSIZE, 0);
   read(fd, buf, BLKSIZE);
 }
@@ -17,7 +17,7 @@ int put_block(int dev, int blk, char buf[ ])
 // minode_table is a global
 void init (PROC proc[NPROC], MINODE *root)
 {
-  printf("init()\n");
+  debugMode("init()\n");
   for (int i = 0; i < NMINODE; i++)
   {
     minode_table[i].dev = 0;
@@ -45,13 +45,13 @@ void init (PROC proc[NPROC], MINODE *root)
 }
 void mount_root(int dev, MINODE **root)
 {
-  printf("mount_root()\n");
+  debugMode("mount_root()\n");
   *root = iget(dev, 2);
 }
 
 int get_itable_begin(int dev, GD *gp)
 {
-  printf("get_itable_begin()\n");
+  debugMode("get_itable_begin()\n");
   char buf[BLKSIZE];
   get_block(dev, 2, buf);
   gp = (GD *)buf;
@@ -64,7 +64,7 @@ int get_itable_begin(int dev, GD *gp)
 
 MINODE *iget(int dev, int ino)
 {
-  printf("iget()\n");
+  debugMode("iget()\n");
   int iblock, blk, disp;    // disp - where in blk is the inode located
   char buf[BLKSIZE];
   MINODE *mip;
@@ -81,7 +81,7 @@ MINODE *iget(int dev, int ino)
     if (mip->dev == dev && mip->ino == ino)
     {
        mip->refCount++;
-       printf("Found [%d %d] as minode[%d] in core\n", dev, ino, i);
+       debugMode("Found [%d %d] as minode[%d] in core\n", dev, ino, i);
        return mip;
     }
   }
@@ -91,7 +91,7 @@ MINODE *iget(int dev, int ino)
   {
     mip = &minode_table[i];
     if (mip->refCount == 0){
-       printf("Allocating NEW minode[%d] for [dev = %d, ino = %d]\n", i, dev, ino);
+       debugMode("Allocating NEW minode[%d] for [dev = %d, ino = %d]\n", i, dev, ino);
        mip->refCount = 1;
        mip->dev = dev;
        mip->ino = ino;  // assing to (dev, ino)
@@ -115,7 +115,7 @@ MINODE *iget(int dev, int ino)
 
 void iput(MINODE *mip)  // dispose of a minode[] pointed by mip
 {
-  printf("iput()\n");
+  debugMode("iput()\n");
   int iblock, blk, disp;    // disp - where in blk is the inode located
   char buf[BLKSIZE];
   INODE *ip;
@@ -149,6 +149,7 @@ void iput(MINODE *mip)  // dispose of a minode[] pointed by mip
 
 int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN])
 {
+  debugMode("getino()");
   int ino, blk, disp;
   char buf[BLKSIZE];
   INODE *ip;
@@ -196,7 +197,7 @@ int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN])
 //copied this over
 void checkMagicNumber(int fd)
 {
-  printf("checkMagicNumber()\n");
+  debugMode("checkMagicNumber()\n");
 
   // read SUPER block
   char buf[BLKSIZE];
@@ -215,7 +216,7 @@ void checkMagicNumber(int fd)
 
 void printSuperBlock(int fd)
 {
-  printf("printSuperBlock()\n");
+  debugMode("printSuperBlock()\n");
   char buf[BLKSIZE];
   get_block(fd, 1, buf);
   SUPER *sp = (SUPER *)buf;
@@ -234,7 +235,7 @@ void printSuperBlock(int fd)
 
 void printInode(INODE* ipCur)
 {
-  printf("printInode()\n");
+  debugMode("printInode()\n");
   printf("=================== Inode Contents ==================\n");
   //printf("i_mode \t\t\t\t\t%hu\n", ipCur->imode);
   printf("i_uid \t\t\t\t\t%d\n", ipCur->i_uid);
