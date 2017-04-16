@@ -1,6 +1,12 @@
 #ifndef PROJECT_H
 #define PROJECT_H
 
+#define TRUE 1
+#define FALSE 0
+#define DEBUG_STATUS FALSE
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -11,6 +17,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
+
+#include <stdint.h>
+
 
 typedef unsigned char  u8;
 typedef unsigned short u16;
@@ -29,6 +38,8 @@ typedef struct ext2_dir_entry_2 DIR;
 #define DEPTH 30
 #define NAMELEN 256
 #define STRLEN BLKSIZE
+
+
 
 typedef struct minode{
   INODE inode;
@@ -56,10 +67,12 @@ typedef struct proc{
 }PROC;
 
 
+
+
 MINODE minode_table[NMINODE];        // global minode[ ] array
 
 // found in HELPER.C
-int get_block(int fd, int blk, char buf[ ]);
+int get_block(int dev, int blk, char buf[ ]);
 int put_block(int dev, int blk, char buf[ ]);
 void init (PROC proc[NPROC], MINODE *root);
 void mount_root(int dev, MINODE **root);
@@ -101,5 +114,8 @@ int bdealloc(int dev, int bno);
 int idealloc(int dev, int ino);
 // found MAIN.C
 void quit(void);
+void debugMode(char* fmt, ...);
+
+
 
 #endif

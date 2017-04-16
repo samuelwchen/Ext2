@@ -1,6 +1,9 @@
 #include "project.h"
 
-// "At this block, is it occupied?""
+/******************************************
+precondition:
+info: tests if bit is 1 or 0.
+******************************************/
 int tst_bit(char *buf, int bit)
 {
   int i, j;
@@ -10,6 +13,10 @@ int tst_bit(char *buf, int bit)
   return 0;
 }
 
+/******************************************
+precondition:
+info: sets bit to 1
+******************************************/
 int set_bit(char *buf, int bit)
 {
   int i, j;
@@ -17,6 +24,10 @@ int set_bit(char *buf, int bit)
   buf[i] |= (1 << j);
 }
 
+/******************************************
+precondition:
+info: sets bit to 1
+******************************************/
 int clr_bit(char *buf, int bit)
 {
   int i, j;
@@ -24,40 +35,54 @@ int clr_bit(char *buf, int bit)
   buf[i] &= ~(1 << j);
 }
 
+/******************************************
+precondition:
+info: decrement free blocks in SUPER and GD
+******************************************/
 int decFreeBlocks(int dev)
 {
   char buf[BLKSIZE];
 
-  // dec free blocks count in SUPER and GD
+  // DECREMENT FREE BLOCKS IN SUPER
   get_block(dev, 1, buf);
   SUPER *sp = (SUPER *)buf;
   sp->s_free_blocks_count--;
   put_block(dev, 1, buf);
   printf("free blocks in super = %d\n", sp->s_free_blocks_count);
 
+  // DECREMENT FREE BLOCKS IN GD
   get_block(dev, 2, buf);
   GD *gp = (GD *)buf;
   gp->bg_free_blocks_count--;
   put_block(dev, 2, buf);
   printf("free blocks in gd = %d\n", gp->bg_free_blocks_count);
+
+  printf("-----------------------------------------\n");
 }
 
+/******************************************
+precondition:
+info: increment free blocks in SUPER and GD
+******************************************/
 int incFreeBlocks(int dev)
 {
   char buf[BLKSIZE];
 
-  // dec free blocks count in SUPER and GD
+  // INCREMENT FREE BLOCKS IN SUPER
   get_block(dev, 1, buf);
   SUPER *sp = (SUPER *)buf;
   sp->s_free_blocks_count++;
   put_block(dev, 1, buf);
   printf("free blocks in super = %d\n", sp->s_free_blocks_count);
 
+  // INCREMENT FREE BLOCKS IN GD
   get_block(dev, 2, buf);
   GD *gp = (GD *)buf;
   gp->bg_free_blocks_count++;
   put_block(dev, 2, buf);
   printf("free blocks in gd = %d\n", gp->bg_free_blocks_count);
+
+  printf("-----------------------------------------\n");
 }
 
 int decFreeInodes(int dev)
@@ -153,7 +178,6 @@ Precondition :: correct dev
 Info :: Allocates a inode block and returns ino number.
 Returns 0 on failure.
 **************************************************/
-//YOU ARE HERE
 int ialloc(int dev)
 {
 

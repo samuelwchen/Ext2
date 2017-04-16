@@ -18,7 +18,7 @@ contains '/', set parse[0] to root.
 **************************************************/
 void parse(char input[STRLEN], char pathname[DEPTH][NAMELEN])
 {
-  printf("parse()\n");
+  debugMode("parse()\n");
   char delim[2] = "/";
   char *token;
   int i = 0;
@@ -47,7 +47,7 @@ name.  Once found, returns the inode of target
 **************************************************/
 int search (int dev, MINODE *mip, char *name)
 {
-  printf("search()\n");
+  debugMode("search()\n");
   char buf[BLKSIZE];
   char *cp;
   DIR *dp;
@@ -112,7 +112,6 @@ int search (int dev, MINODE *mip, char *name)
 Precondition :: all ints must of non-negative.
 Info :: Gets called by search.  recursively searches through
 indirect blocks until block number of interest is found.
-
 **************************************************/
 int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index)
 {
@@ -149,6 +148,7 @@ Can use absolute or relative path
 **************************************************/
 void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 {
+  debugMode("ls()\n");
   int ino = 0;
   MINODE *mip = NULL;
   DIR *dp = NULL;
@@ -172,17 +172,33 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     mip = iget(mip->dev, ino);
   }
 
-  char buf[BLKSIZE];
-  int i = 0, j = 0;
 
   printf("==================== ls ====================\n");
+  printf("Permissions\tFile Size\tName\n");
+  int i = 0, j = 0;
+  char buf[BLKSIZE];
+  MINODE* childmip = NULL;
   while(mip->inode.i_block[i] != 0 && i < 15)
   {
     get_block(dev, mip->inode.i_block[i], buf);
     dp = (DIR *)buf;
 
+    // PRINTING READ, WRITE, EXECUTABLE PERMISSIONS, FILE/DIR NAME
     while (dp < (DIR*)(buf + BLKSIZE))
     {
+      childmip = iget(dev, dp->inode);
+      printf( (S_ISDIR(childmip->inode.i_mode)) ? "d" : "-");
+      printf( (childmip->inode.i_mode & S_IRUSR) ? "r" : "-");
+      printf( (childmip->inode.i_mode & S_IWUSR) ? "w" : "-");
+      printf( (childmip->inode.i_mode & S_IXUSR) ? "x" : "-");
+      printf( (childmip->inode.i_mode & S_IRGRP) ? "r" : "-");
+      printf( (childmip->inode.i_mode & S_IWGRP) ? "w" : "-");
+      printf( (childmip->inode.i_mode & S_IXGRP) ? "x" : "-");
+      printf( (childmip->inode.i_mode & S_IROTH) ? "r" : "-");
+      printf( (childmip->inode.i_mode & S_IWOTH) ? "w" : "-");
+      printf( (childmip->inode.i_mode & S_IXOTH) ? "x\t" : "-\t");
+      printf("%d\t\t", childmip->inode.i_size);
+
       for (j = 0; j < dp->name_len; j++)
       {
         dirName[j] = dp->name[j];
@@ -191,6 +207,8 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
       printf("%s\n", dirName);
 
       dp = (DIR*)((char*)dp + dp->rec_len);
+
+      iput(childmip);
     }
     i++;
   }
@@ -202,6 +220,7 @@ Info :: changes directory.
 **************************************************/
 void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 {
+  debugMode("cd()\n");
   int ino = 0;
   MINODE *mip = NULL;
   DIR *dp = NULL;
@@ -244,7 +263,6 @@ void pwdHelper(int dev, MINODE* mip)
 {
   if (mip->ino == 2)
   {
-    //fflush(stdout);
     printf("Current Directory = /");
     return;
   }
@@ -263,7 +281,7 @@ Info :: returns a 1 if successfully found.  returns a 0 if unsuccessful
 */
 int getNameFromInoHelper(int dev, int level_indirection, int block_num, int ino, char fileName[NAMELEN])
 {
-  printf("getNameFromInoHelper()\n");
+  debugMode("getNameFromInoHelper()\n");
   char buf[BLKSIZE] = {'\0'};
   int *pIndirect_blk = NULL;
   int success = 0;
@@ -317,7 +335,7 @@ int getNameFromInoHelper(int dev, int level_indirection, int block_num, int ino,
 
 void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
 {
-  printf("getNameFromIno()\n");
+  debugMode("getNameFromIno()\n");
   char buf[BLKSIZE];
   char *cp;
   DIR *dp;

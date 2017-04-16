@@ -125,7 +125,7 @@ int main (int argc, char *argv[])
 
 void quit(void)
 {
-  printf("quit()\n");
+  debugMode("quit()\n");
   for (int i = 0; i < NMINODE; i++)
   {
     if (minode_table[i].refCount != 0)
