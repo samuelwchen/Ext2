@@ -395,9 +395,9 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
 
 }
 
-void mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
+void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
 {
-  
+
 }
 
 //Precondition: pip is a dir

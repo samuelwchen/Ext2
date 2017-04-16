@@ -14,6 +14,7 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], int dev, PROC *runnin
 
   //GET INPUT
   //pwd(dev, running->cwd);
+  printf("[ls, pwd, cd, test, quit]\n");
   printf("Enter command [pathname]: ");
   fgets(line, 128, stdin );
   sscanf(line, "%s %s", cmd, input);
