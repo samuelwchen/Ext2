@@ -462,4 +462,102 @@ void my_mkdir(PROC *running, MINODE *pip, char *new_name)
   //WRITE NEW DATABLOCK BACK TO MEMORY
   put_block(pip->dev, bno, dp_buf);
 
+  //add name to parent's directry
+  enter_name(pip, ino, new_name);
+}
+//entername enters a new directy entry in the parent's datablock
+// returns
+// 1 on sucess and 0 on failure
+int enter_name(MINODE *pip, int new_ino, char *new_name)
+{
+  //CALCULATING IDEAL_LENGTH OF NEW RECORD
+  int new_name_len = 0;
+  for (int i = 0; i < 256 && new_name[i] != '\0'; i++)
+  {
+    new_name_len++;
+  }
+  int new_ideal_len = 8 + ( 4 * ( (new_name_len + 3)/4 ) );
+
+  //LOOP THROUGH PARENT'S DIR ENTRIES TO FIND AVAILABLE SPACE
+  int bno = 0;
+  DIR *dp = NULL;
+  char dp_buf[BLKSIZE];
+  for (int i = 0; i < 12; i++)//only direct blocks at the moment
+  {
+    //GET DATABLOCK NUMBER - this will change when we add indirect blocks
+    bno = pip->inode.i_block[i];
+
+    //CHECK IF LAST OF ALLOCATED BLOCKS
+    if (bno == 0)  //DATABLOCK HAS NO ENTRIES YET
+    {
+      debugMode("i_block[%d]... Allocating new data block", i);
+      //ALLOCATE NEW DATABLOCK
+      bno = balloc(pip->dev);
+      pip->inode.i_block[i] = bno;
+
+      //GET DATABLOCK
+      get_block(pip->dev, pip->inode.i_block[i], dp_buf);
+      dp = dp_buf;
+
+      //ADD NEW ENTRY
+      dp->inode = new_ino;
+      dp->rec_len = BLKSIZE;
+      dp->name_len = new_name_len;
+      char *cp = (char *)(dp->name);
+      for (int j = 0; j < NAMELEN && new_name[j] != '\0'; j++)
+      {
+        *cp = new_name[j];
+        cp++;
+      }
+      //WRITE BLOCK BACK TO DISK
+      put_block(pip->dev, bno, dp_buf);
+      return 1;
+    }
+    else  //DATABLOCK HAS ENTRIES ALREADY
+    {
+      //GET DATABLOCK
+      get_block(pip->dev, pip->inode.i_block[i], dp_buf);
+      dp = dp_buf;
+
+      //WALK TO LAST DIR ENTRY
+      while ((char *)dp + dp->rec_len < dp_buf + BLKSIZE)
+      {
+        dp = (DIR *) ( (char *)dp + dp->rec_len );
+      }
+
+      debugMode("i_block[%d]: (Last entry)\n");
+      //CALCULATE IDEAL LENGTH OF LAST ENTRY
+      int last_ideal_len = 8 + ( 4 * ( (dp->name_len + 3)/4 ) );
+      int remaining_space = dp->rec_len - last_ideal_len;
+
+      //CHEACK AVAILABLE SPACE
+      if (new_ideal_len <= remaining_space)
+      {
+        //CHANGE CURRENT REC_LEN TO ITS IDEAL LENGTH
+        dp->rec_len = last_ideal_len;
+
+        //ENTER NEW ENTRY
+        debugMode("dp -> %d, last_ideal_len = %d\n", dp, last_ideal_len);
+
+        //MOVE DP TO AVAILABLE SPACE
+        dp = (DIR *) ( (char *)dp + last_ideal_len );
+        debugMode("dp+last_ideal_len -> %d\n", dp);
+
+        dp->inode = new_ino;
+        dp->rec_len = remaining_space;
+        dp->name_len = new_name_len;
+        char *cp = (char *)(dp->name);
+        for (int j = 0; j < NAMELEN && new_name[j] != '\0'; j++)
+        {
+          *cp = new_name[j];
+          cp++;
+        }
+        //WRITE BLOCK BACK TO DISK
+        put_block(pip->dev, pip->inode.i_block[i], dp_buf);
+        return 1;
+      }
+      debugMode("Checking next i_block..\n");
+    }
+  }
+  return 0;
 }
