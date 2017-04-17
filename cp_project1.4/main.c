@@ -14,7 +14,7 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], int dev, PROC *runnin
 
   //GET INPUT
   //pwd(dev, running->cwd);
-  printf("[ls, pwd, cd, test, quit]\n");
+  printf("[ls, pwd, cd, mkdir, test, quit]\n");
   printf("Enter command [pathname]: ");
   fgets(line, 128, stdin );
   sscanf(line, "%s %s", cmd, input);
@@ -113,6 +113,8 @@ int main (int argc, char *argv[])
       ls(fd, running, pathname);
     else if (!strcmp(cmd, "cd"))
       cd(fd, running, pathname);
+    else if(!strcmp(cmd, "mkdir"))
+      _mkdir(fd, running, pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
 

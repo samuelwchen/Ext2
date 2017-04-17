@@ -91,8 +91,12 @@ int search (int dev, MINODE *mip, char *name);
 int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index);
 void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+
+//found in MKDIR.C
+void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
 void my_mkdir(PROC *running, MINODE *pip, char *new_name);
 int enter_name(MINODE *pip, int new_ino, char *new_name);
+int enter_name_helper(MINODE *pip, int *i_block_ptr, int new_ideal_len, int new_name_len, char *new_name, int new_ino);
 
 // int pwd (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 // int pwdHelper(int dev, char pathname[DEPTH][NAMELEN], MINODE *mip);
