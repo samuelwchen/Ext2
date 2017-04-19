@@ -1,6 +1,12 @@
 #ifndef PROJECT_H
 #define PROJECT_H
 
+#define TRUE 1
+#define FALSE 0
+#define DEBUG_STATUS FALSE
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -10,6 +16,10 @@
 #include <ext2fs/ext2_fs.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <time.h>
+
+#include <stdint.h>
+
 
 typedef unsigned char  u8;
 typedef unsigned short u16;
@@ -28,6 +38,8 @@ typedef struct ext2_dir_entry_2 DIR;
 #define DEPTH 30
 #define NAMELEN 256
 #define STRLEN BLKSIZE
+
+
 
 typedef struct minode{
   INODE inode;
@@ -55,10 +67,12 @@ typedef struct proc{
 }PROC;
 
 
+
+
 MINODE minode_table[NMINODE];        // global minode[ ] array
 
 // found in HELPER.C
-int get_block(int fd, int blk, char buf[ ]);
+int get_block(int dev, int blk, char buf[ ]);
 int put_block(int dev, int blk, char buf[ ]);
 void init (PROC proc[NPROC], MINODE *root);
 void mount_root(int dev, MINODE **root);
@@ -74,10 +88,48 @@ void printInode(INODE* ipCur);
 void sanitizePathname(char pathname[DEPTH][NAMELEN]);
 void parse(char input[STRLEN], char pathname[DEPTH][NAMELEN]);
 int search (int dev, MINODE *mip, char *name);
-void searchHelper(int dev, int level_indirection, int block_num, int inode_table_index);
+int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index);
 void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+
+//found in MKDIR.C
+void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
+void my_mkdir(PROC *running, MINODE *pip, char *new_name);
+int enter_name(MINODE *pip, int new_ino, char *new_name);
+int enter_name_helper(MINODE *pip, int *i_block_ptr, int new_ideal_len, int new_name_len, char *new_name, int new_ino);
+
+// int pwd (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+// int pwdHelper(int dev, char pathname[DEPTH][NAMELEN], MINODE *mip);
+void pwd(int dev, MINODE* mip);
+void pwdHelper(int dev, MINODE* mip);
+int getNameFromInoHelper(int dev, int level_indirection, int block_num, int ino, char fileName[NAMELEN]);
+void getNameFromIno(int dev, int ino, char fileName[NAMELEN]);
+
+//found alloc_dealloc.c
+int tst_bit(char *buf, int bit);
+int set_bit(char *buf, int bit);
+int clr_bit(char *buf, int bit);
+int decFreeBlocks(int dev);
+int incFreeBlocks(int dev);
+int decFreeInodes(int dev);
+int incFreeInodes(int dev);
+int balloc(int dev);
+int ialloc(int dev);
+int bdealloc(int dev, int bno);
+int idealloc(int dev, int ino);
+
 // found MAIN.C
 void quit(void);
+void debugMode(char* fmt, ...);
+
+// found in rmdir.c
+void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+int isDirEmpty(int dev, MINODE* mip);
+void rmEndFile(int dev, DIR* dp, DIR* prevdp);
+void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange);
+void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
+void findLastIblock(int dev, int level_indirection, int block_num, int* lastValidBlock);
+
+
 
 #endif
