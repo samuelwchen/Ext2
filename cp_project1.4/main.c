@@ -106,6 +106,8 @@ int main (int argc, char *argv[])
       ls(fd, running, pathname);
     else if (!strcmp(cmd, "cd"))
       cd(fd, running, pathname);
+    else if (!strcmp(cmd, "rmDir"))
+      rmDir (fd, running, pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
 
