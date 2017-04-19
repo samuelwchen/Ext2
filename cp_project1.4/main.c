@@ -115,6 +115,8 @@ int main (int argc, char *argv[])
       cd(fd, running, pathname);
     else if(!strcmp(cmd, "mkdir"))
       _mkdir(fd, running, pathname);
+    else if (!strcmp(cmd, "rmdir"))
+      rmDir (fd, running, pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
 

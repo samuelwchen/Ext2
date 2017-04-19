@@ -117,9 +117,18 @@ int balloc(int dev);
 int ialloc(int dev);
 int bdealloc(int dev, int bno);
 int idealloc(int dev, int ino);
+
 // found MAIN.C
 void quit(void);
 void debugMode(char* fmt, ...);
+
+// found in rmdir.c
+void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+int isDirEmpty(int dev, MINODE* mip);
+void rmEndFile(int dev, DIR* dp, DIR* prevdp);
+void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange);
+void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
+void findLastIblock(int dev, int level_indirection, int block_num, int* lastValidBlock);
 
 
 
