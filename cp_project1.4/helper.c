@@ -133,7 +133,7 @@ void iput(MINODE *mip)  // dispose of a minode[] pointed by mip
   iblock = get_itable_begin(mip->dev, gp);
 
   /* write INODE back to disk */
-  printf("iput: dev=%d ino=%d\n", mip->dev, mip->ino);
+  debugMode("iput: dev=%d ino=%d\n", mip->dev, mip->ino);
 
    // get INODE of ino into buf[ ]
    blk  = (mip->ino - 1) / 8 + iblock;  // iblock = Inodes start block #
@@ -187,6 +187,7 @@ int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN])
       iput(mip);  //we no longer need this minode
       mip = iget(dev, ino); //getting next inode
    }
+   iput(mip);
    return ino;
 }
 
@@ -245,4 +246,116 @@ void printInode(INODE* ipCur)
   for (int i = 0; i < 15; i++)
     printf("block[%d] = %d\n", i, ipCur->i_block[i]);
   printf("\n");
+}
+
+void fillItUp(int dev, PROC* running)
+{
+  char pathname[DEPTH][NAMELEN];
+  strcpy (pathname[0], "/");
+  strcpy (pathname[1], "X");
+
+  char buf[NAMELEN] = { '\0 '};
+  for (int i = 0; i < 52-9; i++)
+  {
+    strcpy(buf, "newdirectoryhere");
+    if (i < 26)
+      buf[12] = 'A'+i;
+    else
+      buf[12] = ('a'+i-26) ;
+    buf[13] = '\0';
+    strcpy(pathname[2], buf);
+    _mkdir (dev, running, pathname);
+
+  }
+
+
+
+
+}
+
+void addSingleEntryBlock(int dev, PROC* running)
+{
+  int ino = ialloc(running->cwd->dev);
+  int bno = balloc(running->cwd->dev);
+
+  if (bno == 0 | ino == 0)
+  {
+    printf("my_mkdir(): bno = %d, ino = %d", bno, ino);
+    return;
+  }
+
+  //"ALLOCATE" MIP
+  //point cwd at directory X
+  char pathname[DEPTH][BLKSIZE];
+  strcpy(pathname[0], "/");
+  strcpy(pathname[1], "X");
+  cd(dev,running, pathname);
+  MINODE *pip = iget(dev, 12);
+  MINODE *mip = iget(pip->dev, ino);
+
+  //INIT CONTENTS OF MIP
+  INODE *ip = &(mip->inode);
+  ip->i_mode = 040755;      //DIR type and permissions
+  ip->i_uid = running->uid; //user's id
+  ip->i_gid = 0;            //Group id MAY NEED TO CHANGE
+  ip->i_size = BLKSIZE;
+  ip->i_links_count = 2;    //links for . and ..
+  ip->i_atime = time(0L);   //set to current time
+  ip->i_ctime = ip->i_atime;//set to current time
+  ip->i_mtime = ip->i_atime;//set to current time
+  ip->i_blocks = 2;         //Linux: blocks count in 512-bytes chunks
+  ip->i_block[0] = bno;     //Will need for dir entries . and ..
+  for (int i = 1; i < 15; i++)
+  {
+    ip->i_block[i] = 0;     //Unused blocks
+  }
+  mip->dirty = 1;           //mark dirty (so it will be written to mem)
+
+  //WRITE MIP BACK TO MEMORY (DEALLOCATE IT)
+  iput(mip);
+
+  //INIT THE NEW DATABLOCK (I_BLOCK[0])
+  char dp_buf[BLKSIZE];
+  DIR *dp = (DIR *)dp_buf;
+  char *cp = NULL;
+
+  //INIT THE FIRST ENTRY "."
+  dp->inode = ino;
+  dp->rec_len = 12;
+  dp->name_len = 1;
+  cp = (char *)(dp->name);
+  *cp = '.';
+
+  //INIT SECOND ENTRY ".."
+  dp = (DIR *)( (char *)dp + dp->rec_len);
+  dp->inode = pip->ino;
+  dp->rec_len = BLKSIZE - 12;           //remaining space in block
+  dp->name_len = 2;
+  cp = (char *)(dp->name);
+  *cp = '.';
+  cp++;
+  *cp = '.';
+
+  //WRITE NEW DATABLOCK BACK TO MEMORY
+  put_block(pip->dev, bno, dp_buf);
+
+  bno = balloc(running->cwd->dev);
+  //INIT THE NEW DATABLOCK (I_BLOCK[0])
+  char new_dp_buf[BLKSIZE];
+  dp = (DIR *)new_dp_buf;
+  cp = NULL;
+
+  //INIT THE FIRST ENTRY "."
+  dp->inode = ino;
+  dp->rec_len = 1024;
+  dp->name_len = 1;
+  cp = (char *)(dp->name);
+  *cp = 'M';
+
+  //WRITE NEW DATABLOCK BACK TO MEMORY
+  put_block(pip->dev, bno, new_dp_buf);
+
+  pip->inode.i_block[2] = pip->inode.i_block[1];
+  pip->inode.i_block[1] = bno;
+  iput(pip);
 }

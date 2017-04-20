@@ -8,7 +8,7 @@ directory is empty.
 void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 {
 
-  MINODE* mip = pathnameToMip(dev, running, pathname[DEPTH][NAMELEN]);
+  MINODE* mip = pathnameToMip(dev, running, pathname);
   if (mip == NULL)
     return;
 
@@ -34,12 +34,13 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     return;
   }
 
-  if (mip->inode.i_links_count)
+  if (mip->inode.i_links_count > 2)
   {
     printf("Directory is referenced by more than 2 links count.  Currently referenced by %d links.  Cannot delete.\n", mip->inode.i_links_count);
     return;
   }
 
+  debugMode("refCount = %d", mip->refCount);
   if (mip->refCount != 1)
   {
     printf("Directory being used by %d other programs.  Cannot delete.\n", mip->refCount - 1);
@@ -64,30 +65,45 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
       if (mip->ino == dp->inode)    // target dir to delete found!
       {
         // THREE CASES FOR DIRECTORY DELETION
-        if (((char *)dp + dp->rec_len > buf + BLKSIZE) && prevdp != NULL)   // target dir is the last entry in that particular datablock AND there are other records in datablock
+        if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp != NULL)   // target dir is the last entry in that particular datablock AND there are other records in datablock
         {
-          rmEndFile(dev, dp, prevdp);
+          rmEndFile(dev, dp, prevdp, pmip->inode.i_block[i], buf);
+          //put_block(dev, pmip->inode.i_block[i], buf);
+          iput(pmip);
+          iput(mip);
           return;
         }
-        else if (((char *)dp + dp->rec_len > buf + BLKSIZE) && prevdp == NULL) // target dir is the ONLY entry.  Must find last block to replace it.
+        else if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp == NULL) // target dir is the ONLY entry.  Must find last block to replace it.
         {
-          rmOnlyFile(dev, pmip, pmip->inode.i_block[i]);
+          rmOnlyFile(dev, pmip, &(pmip->inode.i_block[i]));
+          //put_block(dev, pmip->inode.i_block[i], buf);
+          iput(pmip);
+          iput(mip);
           return;
         }
         else
         {
-          rmMiddleFile(dev, dp, buf);
+          rmMiddleFile(dev, dp, pmip->inode.i_block[i], buf);
+          //put_block(dev, pmip->inode.i_block[i], buf);
+          iput(pmip);
+          iput(mip);
           return;
         }
       }
+      prevdp = dp;
+      dp = (char*)dp + dp->rec_len;
     }
   }
+
 
   // NOT IN DIRECT BLOCKS.  LOOKING AT LEVEL OF INDIRECTION
   if (pmip->inode.i_block[12])
   {
 
   }
+
+  iput(pmip);
+  iput(mip);
 }
 
 /***************************************************************************
@@ -112,9 +128,10 @@ int isDirEmpty(int dev, MINODE* mip)
 }
 
 
-void rmEndFile(int dev, DIR* dp, DIR* prevdp)
+void rmEndFile(int dev, DIR* dp, DIR* prevdp, int block_num, char buf[BLKSIZE])
 {
   prevdp->rec_len = prevdp->rec_len + dp->rec_len;
+  put_block(dev, block_num, buf);
 }
 void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange)
 {
@@ -123,39 +140,36 @@ void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange)
 
   for (int i = 0; i < 12; i++)
   {
-    pmip->inode.i_block[i];
     if (pmip->inode.i_block[i] != 0)
-      lastValidBlock = pmip->inode.i_block[i];
+      lastValidBlock = &(pmip->inode.i_block[i]);
     else
       break;
   }
-  if (pmip->inode.i_block[12])      // if non-zero value in iblock, check the indirect blocks
-    findLastIblock(dev, 1, pmip->inode.i_block[12], lastValidBlock);
-  if (pmip->inode.i_block[13])
-    findLastIblock(dev, 2, pmip->inode.i_block[13], lastValidBlock);
-  if (pmip->inode.i_block[14])
-    findLastIblock(dev, 3, pmip->inode.i_block[14], lastValidBlock);
 
-  if (*lastValidBlock == *iblockToChange)   // the block to be deleted is the last block
-    iblockToChange = 0;
-  else                                      // iblock to be set to 0 is replaced by last valid iblock
+  for (int i = 12; i < 15; i++)
   {
-    *iblockToChange = *lastValidBlock;
-    *lastValidBlock = 0;
+    if (pmip->inode.i_block[i] == 0)
+      break;
+
+    findLastIblock(dev, i-11, pmip->inode.i_block[i], lastValidBlock);
   }
+
+  *iblockToChange = *lastValidBlock;
+  *lastValidBlock = 0;
 }
-void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE])
+//void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE])
+void rmMiddleFile(int dev, DIR *dp, int block_num, char buf[BLKSIZE])
 {
   int deleted_rec_len = dp->rec_len;
   int n = BLKSIZE - ((char*)dp-(char*)buf) - dp->rec_len;
-  memcpy(dp, (char*)dp + dp->rec_len, n);
+  memmove(dp, (char*)dp + dp->rec_len, n);
 
   while ((char*)dp + dp->rec_len + deleted_rec_len < buf + BLKSIZE)
   {
     dp = (char*)dp + dp->rec_len;
   }
   dp->rec_len = dp->rec_len + deleted_rec_len;
-
+  put_block(dev, block_num, buf);
 }
 /***************************************************************************
 precondition: None

@@ -78,12 +78,14 @@ int main (int argc, char *argv[])
 
   MINODE *mip = iget(fd, 2);
   printInode(&(mip->inode));
+  iput(mip);
 
   while (1)
   {
     sanitizePathname(pathname);
     //pwd(fd, running->cwd);
     getInput(cmd, pathname, fd, running);
+    printf("main() before call, running->cwd->refCount = %d, ino = %d\n", running->cwd->refCount, running->cwd->ino);
     if (!strcmp(cmd, "test"))
     {
       // int testNum = 2;
@@ -119,6 +121,11 @@ int main (int argc, char *argv[])
       rmDir (fd, running, pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
+    else if (!strcmp(cmd, "fill"))
+      fillItUp(fd, running);
+    else if (!strcmp(cmd, "addSingle"))
+      addSingleEntryBlock(fd, running);
+
 
 
   }

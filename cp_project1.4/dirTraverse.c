@@ -160,8 +160,11 @@ MINODE* pathnameToMip(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     if (ino == 0)
     {
       printf("Dir path does not exists.\n");
+      iput(mip);
       return NULL;
     }
+    int tempDev = mip->dev;
+    iput(mip);
     mip = iget(mip->dev, ino);
   }
 
@@ -181,29 +184,11 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   DIR *dp = NULL;
   char dirName[NAMELEN];
 
-
+  printf("ls(): running: %d\n", running->cwd->ino);
   mip = pathnameToMip(dev, running, pathname);
+  printf("ls(): running: %d\n", running->cwd->ino);
   if (mip == NULL)
     return;
-
-  // if ( !strcmp(pathname[0], "/") )
-  //    mip = iget(dev, 2);
-  // else
-  //    mip = iget(running->cwd->dev, running->cwd->ino);
-  //
-  // // convert pathname to (dev, ino);
-  // // get a MINODE *mip pointing at a minode[ ] with (dev, ino);
-  // if (!(pathname[0][0] == '\0'))
-  // {
-  //   ino = getino(mip->dev, running, pathname);
-  //   if (ino == 0)
-  //   {
-  //     printf("Dir path does not exists.\n");
-  //     return;
-  //   }
-  //   mip = iget(mip->dev, ino);
-  // }
-
 
   printf("==================== ls ====================\n");
   printf("Permissions\tFile Size\tName\n");
@@ -272,7 +257,9 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     printf("Dir path does not exists.\n");
     return;
   }
-  mip = iget(mip->dev, ino);
+  int tempDev = mip->dev;
+  iput(mip);
+  mip = iget(tempDev, ino);
 
   if(!S_ISDIR(mip->inode.i_mode))
   {
@@ -306,6 +293,7 @@ void pwdHelper(int dev, MINODE* mip)
   char fileName[NAMELEN] = {'\0'};
   getNameFromIno(dev, mip->ino, fileName);
   printf("%s/", fileName);
+  iput(pmip);
 }
 
 /*
@@ -376,6 +364,7 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
 
   MINODE *mip = iget(dev, ino);
   int pino = search(dev, mip, "..");
+  iput(mip);
   mip = iget(dev, pino);
 
     // WALKS THROUGH INODE_TABLE [0 TO 11] (DIRECT BLOCKS)
@@ -417,13 +406,17 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
   {
     printf("At i_block[%d] = %d\n",index, mip->inode.i_block[i]);
     if(mip->inode.i_block[i] == 0)
+    {
+      iput(mip);
       return;
+    }
     getNameFromInoHelper(dev, i-11, mip->inode.i_block[i], ino, fileName);//will return null if not found
-    return;
+
   }
 
   // DID NOT FIND TARGET FILE
   printf("File NOT found.\n");
+  iput(mip);
   return;
 
 }
