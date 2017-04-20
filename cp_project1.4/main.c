@@ -1,6 +1,6 @@
 #include "project.h"
 
-void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], int dev, PROC *running)
+void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSIZE], int dev, PROC *running)
 {
   //char cmd[64], pathname[DEPTH][NAMELEN];
   char input[BLKSIZE] = {'\0'};
@@ -17,7 +17,17 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], int dev, PROC *runnin
   printf("[ls, pwd, cd, mkdir, test, quit]\n");
   printf("Enter command [pathname]: ");
   fgets(line, 128, stdin );
-  sscanf(line, "%s %s", cmd, input);
+
+
+  sscanf(line, "%s %s %s", cmd, input, sourcePath);
+
+  if (strcmp(cmd, "link") == 0)
+  {
+    char buf[BLKSIZE] = {'\0'};
+    strcpy(buf, sourcePath);
+    strcpy(input, sourcePath);
+    strcpy(buf, input);
+  }
 
   if (input[0] == '\0')
   {
@@ -40,6 +50,7 @@ int main (int argc, char *argv[])
   char *disk = "mydisk";
   char line[128], cmd[64], pathname[DEPTH][NAMELEN];
   char input[BLKSIZE];
+  char old_pathname[BLKSIZE];
   char buf[BLKSIZE];              // define buf1[ ], buf2[ ], etc. as you need
   char gpbuf[BLKSIZE];
   char ipbuf[BLKSIZE];
@@ -84,7 +95,7 @@ int main (int argc, char *argv[])
   {
     sanitizePathname(pathname);
     //pwd(fd, running->cwd);
-    getInput(cmd, pathname, fd, running);
+    getInput(cmd, pathname, old_pathname, fd, running);
     printf("main() before call, running->cwd->refCount = %d, ino = %d\n", running->cwd->refCount, running->cwd->ino);
     if (!strcmp(cmd, "test"))
     {
@@ -119,10 +130,18 @@ int main (int argc, char *argv[])
       _mkdir(fd, running, pathname);
     else if (!strcmp(cmd, "rmdir"))
       rmDir (fd, running, pathname);
+    else if (!strcmp(cmd, "symlink"))
+      _symlink (fd, running, pathname, old_pathname);
+    // else if (!strcmp(cmd, "link"))
+    //   link (fd, running, pathname, old_pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
+
+
     else if (!strcmp(cmd, "fill"))
       fillItUp(fd, running);
+    else if (!strcmp(cmd, "fill2"))
+      fillItUp2(fd, running);
     else if (!strcmp(cmd, "addSingle"))
       addSingleEntryBlock(fd, running);
 

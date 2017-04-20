@@ -50,6 +50,9 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   // DELETION NOW POSSIBLE.  PREPARING TO DELETE
   int pino = search(dev, mip, "..");    // need parent directory
   MINODE *pmip = iget(dev, pino);
+  pmip->inode.i_links_count--;
+  pmip->dirty = 1;
+
   DIR *prevdp = NULL;
   DIR *dp = NULL;
   char buf[BLKSIZE];
@@ -91,7 +94,7 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
         }
       }
       prevdp = dp;
-      dp = (char*)dp + dp->rec_len;
+      dp = (DIR*)((char*)dp + dp->rec_len);
     }
   }
 
@@ -130,6 +133,7 @@ int isDirEmpty(int dev, MINODE* mip)
 
 void rmEndFile(int dev, DIR* dp, DIR* prevdp, int block_num, char buf[BLKSIZE])
 {
+  idealloc(dev, dp->inode);
   prevdp->rec_len = prevdp->rec_len + dp->rec_len;
   put_block(dev, block_num, buf);
 }
@@ -154,19 +158,28 @@ void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange)
     findLastIblock(dev, i-11, pmip->inode.i_block[i], lastValidBlock);
   }
 
+  // CLEANING UP INODES AND BNO
+  char buf[BLKSIZE];
+  get_block(dev, *iblockToChange, buf);
+  DIR *dp = (DIR*)buf;
+  idealloc(dev, dp->inode);
+  bdealloc(dev, *iblockToChange);
+
   *iblockToChange = *lastValidBlock;
   *lastValidBlock = 0;
 }
 //void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE])
 void rmMiddleFile(int dev, DIR *dp, int block_num, char buf[BLKSIZE])
 {
+  idealloc(dev, dp->inode);
+
   int deleted_rec_len = dp->rec_len;
   int n = BLKSIZE - ((char*)dp-(char*)buf) - dp->rec_len;
   memmove(dp, (char*)dp + dp->rec_len, n);
 
   while ((char*)dp + dp->rec_len + deleted_rec_len < buf + BLKSIZE)
   {
-    dp = (char*)dp + dp->rec_len;
+    dp = (DIR*)((char*)dp + dp->rec_len);
   }
   dp->rec_len = dp->rec_len + deleted_rec_len;
   put_block(dev, block_num, buf);

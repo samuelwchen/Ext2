@@ -254,7 +254,8 @@ void fillItUp(int dev, PROC* running)
   strcpy (pathname[0], "/");
   strcpy (pathname[1], "X");
 
-  char buf[NAMELEN] = { '\0 '};
+  //char buf[NAMELEN] = { '\0 '};
+  char buf[NAMELEN];
   for (int i = 0; i < 52-9; i++)
   {
     strcpy(buf, "newdirectoryhere");
@@ -265,13 +266,63 @@ void fillItUp(int dev, PROC* running)
     buf[13] = '\0';
     strcpy(pathname[2], buf);
     _mkdir (dev, running, pathname);
-
   }
-
-
-
-
 }
+
+void rpd2(int x, char numbuf[NAMELEN], char *location, int flag)
+{
+  if (x == 0)
+  {
+    *location = '\0';
+    return;
+  }
+  char *table = "0123456789ABCDEF";
+  char c;
+	if (x){
+		c = table[x % 10];
+
+		*location = c;
+    location++;
+    rpd2(x / 10, numbuf, location, 0);
+	}
+  // if (flag == 1)
+  // {
+  //   *location = '\0';
+  // }
+}
+void fillItUp2(int dev, PROC* running)
+{
+  char pathname[DEPTH][NAMELEN];
+  strcpy (pathname[0], "/");
+  strcpy (pathname[1], "X");
+
+  //char buf[NAMELEN] = { '\0 '};
+  char buf[NAMELEN];
+  char numbuf[NAMELEN];
+  char *cp = NULL;
+
+  for (int i = 0; i < 50; i++)
+  {
+    strcpy(buf, "newdirectoryhereajsdhfkldjsfjkahsfkjhfkjhajsfkhsaklfhksdfhkadfhashfdkashdfkasfdhakfdhjakhdfjkvnasdkjcakjnsckajsdkjnadfkhjfaiuehaihdkjahsdfkjahskjdncsajkdnckasjncdkasjdnckjasndfckjfnkjsafdhkjashdfkajshfdauwehakjsdnkjcnaksjdfhfkajhsdfkj");
+
+    cp = (char*)numbuf;
+    if(i == 0)
+    {
+      numbuf[0] = '0';
+      numbuf[1] = '\0';
+    }
+    else
+    {
+      rpd2(i, numbuf, cp, 1);
+    }
+    strcat(buf, numbuf);
+
+
+    strcpy(pathname[2], buf);
+    _mkdir (dev, running, pathname);
+  }
+}
+
 
 void addSingleEntryBlock(int dev, PROC* running)
 {
@@ -289,7 +340,7 @@ void addSingleEntryBlock(int dev, PROC* running)
   char pathname[DEPTH][BLKSIZE];
   strcpy(pathname[0], "/");
   strcpy(pathname[1], "X");
-  cd(dev,running, pathname);
+  //cd(dev,running, pathname);
   MINODE *pip = iget(dev, 12);
   MINODE *mip = iget(pip->dev, ino);
 

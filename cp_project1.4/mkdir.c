@@ -41,7 +41,7 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   if ( strcmp(pathname[0] ,"\0" ) == 0 )
   {
     //no pathname pip is mip
-    pip = mip;
+    pip = iget(mip->dev, mip->ino);
   }
   else
   {
@@ -194,7 +194,7 @@ int enter_name(MINODE *pip, int new_ino, char *new_name)
       indirect1_blk_ptr = (int *)indirect1_blk_buf;
 
       //WALK THROUGH INDIRECT BLOCK
-      while (indirect1_blk_ptr < (indirect1_blk_buf + BLKSIZE) )
+      while (indirect1_blk_ptr < (int*)(indirect1_blk_buf + BLKSIZE) )
       {
         name_entered = enter_name_helper(pip, indirect1_blk_ptr, new_ideal_len, new_name_len, new_name, new_ino);
         if (name_entered == 1)
