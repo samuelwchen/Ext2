@@ -14,6 +14,15 @@
 
 void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE])
 {
+  //CHECKING THE OLD AND NEW PATH NAMES ARE CORRECT
+  printf("***new_pathname: \"");
+  for (int j = 0; j < DEPTH && strcmp(new_pathname_arr[j], "\0") != 0; j++ )
+  {
+    printf("%s/", new_pathname_arr[j]);
+  }
+  printf("\"\n");
+  printf("****old_pathname: \"%s\"", old_pathname);
+
   //PARSE OLD_PATHANAME
   char old_pathname_arr[DEPTH][NAMELEN];
   parse(old_pathname, old_pathname_arr);  //parse will sanitize the pathname
@@ -42,7 +51,17 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   strcpy(new_pathname_arr[i], "\0");
 
   //CHECK IF NEW_PATHNAME_ARR IS VALID PATH
-  int pino = getino(dev, running, new_pathname_arr);
+  int pino = 0;
+  if(strcmp(new_pathname_arr[0], "\0") == 0)
+  {
+    pino = running->cwd->ino;
+  }
+  else
+  {
+    pino = getino(dev, running, new_pathname_arr);
+  }
+
+  debugMode("symlink(): pino = %d\n", pino);
   if (pino == 0)
   {
     //OLD_PATHNAME_ARR DOES NOT EXISTS - ABORT
@@ -90,6 +109,7 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   mip->dirty = 1;           //mark dirty (so it will be written to mem)
   /******************************************/
 
+  debugMode("symlink(): About to insert new link into pmip's directory\n\tpino = %d\n", pino);
   //INSERT NEW LINK ENTRY INTO PARENT DIRECTORY
   MINODE *pmip = iget(dev, pino);
   enter_name(pmip, new_ino, new_filename);

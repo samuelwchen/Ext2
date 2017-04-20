@@ -20,14 +20,14 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSI
 
 
   sscanf(line, "%s %s %s", cmd, input, sourcePath);
-
-  if (strcmp(cmd, "link") == 0)
+/*
+  if (strcmp(cmd, "link") == 0 || strcmp(cmd, "symlink") == 0)
   {
     char buf[BLKSIZE] = {'\0'};
     strcpy(buf, sourcePath);
-    strcpy(input, sourcePath);
-    strcpy(buf, input);
-  }
+    strcpy(sourcePath, input);
+    strcpy(input, buf);
+  }*/
 
   if (input[0] == '\0')
   {
