@@ -139,7 +139,7 @@ void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange);
 void rmMiddleFile(int dev, DIR *dp, int block_num, char buf[BLKSIZE]);
 //void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
 void findLastIblock(int dev, int level_indirection, int block_num, int* lastValidBlock);
-
+void rmDirEntry(int dev, MINODE* pmip, MINODE* mip);
 //LINK.C
 void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN]);
 void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE]);

@@ -140,7 +140,7 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   it in filename.
   Used to print (symlink -> filename)
 */
-void readLink (int dev, PROC* running, sym_pathname_arr[DEPTH][NAMELEN])
+void readLink (int dev, PROC* running, char sym_pathname_arr[DEPTH][NAMELEN])
 {
   //GET MINODE OF THE SYMLINK
   int ino = getino( dev, running, sym_pathname_arr);
@@ -161,8 +161,8 @@ void readLink (int dev, PROC* running, sym_pathname_arr[DEPTH][NAMELEN])
     //GET LAST FILENAME
     char filename[NAMELEN] = {'\0'};
     char linkname[NAMELEN] = {'\0'};
-    void getChildFileName(pathname_arr, filename);
-    void getChildFileName(sym_pathname_arr, linkname);
+    getChildFileName(pathname_arr, filename);
+    getChildFileName(sym_pathname_arr, linkname);
 
     printf("%s -> %s", linkname, filename);
   }
