@@ -53,9 +53,121 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   pmip->inode.i_links_count--;
   pmip->dirty = 1;
 
+  // DIR *prevdp = NULL;
+  // DIR *dp = NULL;
+  // char buf[BLKSIZE];
+  //
+  //
+  // for (int i = 0; i < 12; i++)
+  // {
+  //   prevdp = NULL;
+  //   get_block(dev, pmip->inode.i_block[i], buf);
+  //   dp = (DIR*)buf;
+  //   while (dp < (DIR*)(buf + BLKSIZE))
+  //   {
+  //     if (mip->ino == dp->inode)    // target dir to delete found!
+  //     {
+  //       // THREE CASES FOR DIRECTORY DELETION
+  //       if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp != NULL)   // target dir is the last entry in that particular datablock AND there are other records in datablock
+  //       {
+  //         rmEndFile(dev, dp, prevdp, pmip->inode.i_block[i], buf);
+  //         //put_block(dev, pmip->inode.i_block[i], buf);
+  //         iput(pmip);
+  //         iput(mip);
+  //         return;
+  //       }
+  //       else if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp == NULL) // target dir is the ONLY entry.  Must find last block to replace it.
+  //       {
+  //         rmOnlyFile(dev, pmip, &(pmip->inode.i_block[i]));
+  //         //put_block(dev, pmip->inode.i_block[i], buf);
+  //         iput(pmip);
+  //         iput(mip);
+  //         return;
+  //       }
+  //       else
+  //       {
+  //         rmMiddleFile(dev, dp, pmip->inode.i_block[i], buf);
+  //         //put_block(dev, pmip->inode.i_block[i], buf);
+  //         iput(pmip);
+  //         iput(mip);
+  //         return;
+  //       }
+  //     }
+  //     prevdp = dp;
+  //     dp = (DIR*)((char*)dp + dp->rec_len);
+  //   }
+  // }
+  //
+  //
+  // // NOT IN DIRECT BLOCKS.  LOOKING AT LEVEL OF INDIRECTION
+  // if (pmip->inode.i_block[12])
+  // {
+  //
+  // }
+
+  rmDirEntry(dev, pmip, mip);
+  iput(pmip);
+  iput(mip);
+}
+
+void freeBlockHelper(int dev, int level_indirection, int block_num)
+{
+  char buf[BLKSIZE];
+  get_block(dev, block_num, buf);
+  int *pIndirect_blk = (int*)buf;
+
+  if (level_indirection == 1)
+  {
+    for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
+    {
+      if (*pIndirect_blk != 0)
+        bdealloc(dev, *pIndirect_blk);
+      else
+        return;
+    }
+  }
+  else if (level_indirection > 1)
+  {
+    for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
+    {
+      if (*pIndirect_blk != 0)
+        freeBlockHelper(dev, level_indirection - 1, *pIndirect_blk);
+      else
+        return;
+    }
+  }
+  else
+  {
+    printf("freeBlockHelper reached level of indirection = 0.  Should NOT have happened.\n");
+    return;
+  }
+
+}
+void rmDirEntry(int dev, MINODE* pmip, MINODE* mip)
+{
   DIR *prevdp = NULL;
   DIR *dp = NULL;
   char buf[BLKSIZE];
+
+  // last link to be disconnected.  free inode and block_num
+  if (mip->inode.i_links_count == 1)
+  {
+    for (int i = 0; i < 12; i++)
+    {
+      if (mip->inode.i_block[i] != 0)
+        bdealloc(dev, mip->inode.i_block[i]);
+      else
+        break;
+    }
+
+    for (int i = 12; i < 15; i++)
+    {
+      if (mip->inode.i_block[i] == 0)
+        break;
+
+      freeBlockHelper(dev, i-11, mip->inode.i_block[i]);
+    }
+  }
 
 
   for (int i = 0; i < 12; i++)
@@ -71,7 +183,6 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
         if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp != NULL)   // target dir is the last entry in that particular datablock AND there are other records in datablock
         {
           rmEndFile(dev, dp, prevdp, pmip->inode.i_block[i], buf);
-          //put_block(dev, pmip->inode.i_block[i], buf);
           iput(pmip);
           iput(mip);
           return;
@@ -79,7 +190,6 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
         else if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp == NULL) // target dir is the ONLY entry.  Must find last block to replace it.
         {
           rmOnlyFile(dev, pmip, &(pmip->inode.i_block[i]));
-          //put_block(dev, pmip->inode.i_block[i], buf);
           iput(pmip);
           iput(mip);
           return;
@@ -87,7 +197,6 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
         else
         {
           rmMiddleFile(dev, dp, pmip->inode.i_block[i], buf);
-          //put_block(dev, pmip->inode.i_block[i], buf);
           iput(pmip);
           iput(mip);
           return;
@@ -104,11 +213,7 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   {
 
   }
-
-  iput(pmip);
-  iput(mip);
 }
-
 /***************************************************************************
 precondition: None
 info: Called by remove dir.  Checks if directory empty by seeing if
