@@ -132,11 +132,16 @@ int main (int argc, char *argv[])
       rmDir (fd, running, pathname);
     else if (!strcmp(cmd, "symlink"))
       _symlink (fd, running, pathname, old_pathname);
-    // else if (!strcmp(cmd, "link"))
-    //   link (fd, running, pathname, old_pathname);
+    else if (!strcmp(cmd, "unlink"))
+       _unlink (fd, running, pathname);
+     else if (!strcmp(cmd, "create"))
+        create (fd, running, pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
 
+
+    else if (!strcmp(cmd, "super"))
+      printSuperBlock(fd);
 
     else if (!strcmp(cmd, "fill"))
       fillItUp(fd, running);
@@ -145,7 +150,8 @@ int main (int argc, char *argv[])
     else if (!strcmp(cmd, "addSingle"))
       addSingleEntryBlock(fd, running);
 
-
+    else
+      printf("command %s was not recognized.\n\n", cmd);
 
   }
 

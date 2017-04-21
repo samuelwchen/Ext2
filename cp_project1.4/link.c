@@ -16,7 +16,29 @@
   If the pathname saved for the link is not absolute than the readlink
   will try to start searching for the file in the current working directory
 
+
 */
+
+void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN])
+{
+  int i = 0;
+  for (i; i < DEPTH; i++) //just setting i to the last one
+  {
+    //CHECK IF LAST IN ARRAY
+    if (i == (DEPTH -1) || strcmp(new_pathname_arr[i + 1], "\0") == 0 )
+    {
+      break;
+    }
+  }
+
+  strcpy(new_filename, new_pathname_arr[i]);
+  // if (i == 0)
+  //   strcpy(new_pathname_arr[i], "/");
+  // else
+    strcpy(new_pathname_arr[i], "\0");
+
+}
+
 void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE])
 {
   //CHECKING THE OLD AND NEW PATH NAMES ARE CORRECT
@@ -43,19 +65,23 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
     return;
   }
 
-  //MOVE CHILD OUT OF NEW_PATHNAME_ARR
-  int i = 0;
-  for (i; i < DEPTH; i++) //just setting i to the last one
-  {
-    //CHECK IF LAST IN ARRAY
-    if (i == (DEPTH -1) || strcmp(new_pathname_arr[i + 1], "\0") == 0 )
-    {
-      break;
-    }
-  }
   char new_filename[NAMELEN];
-  strcpy(new_filename, new_pathname_arr[i]);
-  strcpy(new_pathname_arr[i], "\0");
+  getChildFileName(new_pathname_arr, new_filename);
+
+
+  //MOVE CHILD OUT OF NEW_PATHNAME_ARR
+  // int i = 0;
+  // for (i; i < DEPTH; i++) //just setting i to the last one
+  // {
+  //   //CHECK IF LAST IN ARRAY
+  //   if (i == (DEPTH -1) || strcmp(new_pathname_arr[i + 1], "\0") == 0 )
+  //   {
+  //     break;
+  //   }
+  // }
+  // char new_filename[NAMELEN];
+  // strcpy(new_filename, new_pathname_arr[i]);
+  // strcpy(new_pathname_arr[i], "\0");
 
   //CHECK IF NEW_PATHNAME_ARR IS VALID PATH
   int pino = 0;
@@ -73,7 +99,7 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   {
     //OLD_PATHNAME_ARR DOES NOT EXISTS - ABORT
     printf("pathname: \"");
-    for (int j = 0; j < DEPTH && strcmp(new_pathname_arr[i], "\0") != 0; j++ )
+    for (int j = 0, i = 0; j < DEPTH && strcmp(new_pathname_arr[i], "\0") != 0; j++, i++ )
     {
       printf("%s/", new_pathname_arr[i]);
     }
@@ -126,6 +152,7 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   iput(pmip);
 }
 
+
 int readSymLink(int dev, PROC* running, MINODE *mip)
 {
   //CHECK IF MIP IS A SYMLINK
@@ -148,4 +175,55 @@ int readSymLink(int dev, PROC* running, MINODE *mip)
   return ino;
 
   //return 0;
+}
+
+void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
+{
+
+  MINODE* mip = pathnameToMip(dev, running, pathname);
+  MINODE* pmip = NULL;
+  char filename[NAMELEN];
+  getChildFileName(pathname, filename);
+
+  if (mip == NULL)
+    return;
+
+    // CHECKING IF DIRECTORY IS VALID FOR DELETION
+    if (mip == 0)
+    {
+      printf("No such directory.\n");
+      return;
+    }
+
+    if (! (S_ISLNK(mip->inode.i_mode) || S_ISREG(mip->inode.i_mode)))
+    {
+      printf("%s is not a file or symlink.\n", filename);
+      return;
+    }
+
+    debugMode("refCount = %d", mip->refCount);
+    if (mip->refCount != 1)
+    {
+      printf("Directory being used by %d other programs.  Cannot delete.\n", mip->refCount - 1);
+      return;
+    }
+
+
+  // DELETION NOW POSSIBLE.  PREPARING TO DELETE
+
+  if (strcmp(pathname[0], "\0") == 0)
+    pmip = iget(dev, running->cwd->ino);
+  else
+    pmip = iget(dev, getino(dev, running, pathname));
+
+
+  rmDirEntry(dev, pmip, mip);
+
+
+
+
+
+
+
+
 }
