@@ -16,6 +16,9 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSI
   //pwd(dev, running->cwd);
   printf("[ls, pwd, cd, mkdir, test, quit]\n");
   printf("Enter command [pathname]: ");
+  // printf("Enter command [");
+  // pwdMainMenu(dev, running->cwd);
+  // printf("]: ");
   fgets(line, 128, stdin );
 
 

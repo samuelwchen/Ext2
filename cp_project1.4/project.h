@@ -135,12 +135,15 @@ void debugMode(char* fmt, ...);
 void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 int isDirEmpty(int dev, MINODE* mip);
 void rmEndFile(int dev, DIR* dp, DIR* prevdp, int block_num, char buf[BLKSIZE]);
+void rmFileHelper(int dev, int level_indirection, int block_num, MINODE *mip);
 //void rmEndFile(int dev, DIR* dp, DIR* prevdp);
 void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange);
 void rmMiddleFile(int dev, DIR *dp, int block_num, char buf[BLKSIZE]);
 //void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
 void findLastIblock(int dev, int level_indirection, int block_num, int* lastValidBlock);
 void rmDirEntry(int dev, MINODE* pmip, MINODE* mip);
+
+
 //LINK.C
 void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN]);
 void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE]);

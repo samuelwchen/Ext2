@@ -158,11 +158,70 @@ void rmDirEntry(int dev, MINODE* pmip, MINODE* mip)
   }
 
 
-  // NOT IN DIRECT BLOCKS.  LOOKING AT LEVEL OF INDIRECTION
-  if (pmip->inode.i_block[12])
+  // LEAVING DIRECT BLOCKS.  LOOKING AT LEVEL OF INDIRECTION
+  for (int i = 12; i < 15; i++)
   {
+    if (mip->inode.i_block[i] == 0)
+      break;
 
+    rmFileHelper(dev, i-11, mip->inode.i_block[i], dp);
   }
+}
+
+
+void rmFileHelper(int dev, int level_indirection, int block_num, MINODE *mip)
+{
+  char buf[BLKSIZE];
+  get_block(dev, block_num, buf);
+  int *pIndirect_blk = (int*)buf;
+  DIR *dp = (DIR*)buf;
+  DIR *prevdp = NULL;
+
+  // if (level_indirection == 0)
+  // {
+  //   while (dp < (DIR*)(buf + BLKSIZE))
+  //   {
+  //     if (mip->ino == dp->inode)    // target dir to delete found!
+  //     {
+  //       // THREE CASES FOR DIRECTORY DELETION
+  //       if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp != NULL)   // target dir is the last entry in that particular datablock AND there are other records in datablock
+  //       {
+  //         rmEndFile(dev, dp, prevdp, block_num, buf);
+  //         //iput(pmip);
+  //         iput(mip);
+  //         return;
+  //       }
+  //       else if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp == NULL) // target dir is the ONLY entry.  Must find last block to replace it.
+  //       {
+  //         rmOnlyFile(dev, pmip, &(block_num));
+  //         //iput(pmip);
+  //         iput(mip);
+  //         return;
+  //       }
+  //       else
+  //       {
+  //         rmMiddleFile(dev, dp, block_num, buf);
+  //         //iput(pmip);
+  //         iput(mip);
+  //         return;
+  //       }
+  //     }
+  //     prevdp = dp;
+  //     dp = (DIR*)((char*)dp + dp->rec_len);
+  //   }
+  // }
+  // else
+  // {
+  //
+  //   for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
+  //   {
+  //     if (*pIndirect_blk != 0)
+  //       rmFileHelper(dev, level_indirection - 1, *pIndirect_blk, mip);
+  //     else
+  //       return;
+  //   }
+  // }
+
 }
 /***************************************************************************
 precondition: None

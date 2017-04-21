@@ -55,8 +55,8 @@ int search (int dev, MINODE *mip, char *name)
   u32 iblock;
   int i = 0;
 
-  printf("Name of file to find == %s\n", name);
-  printInode(&(mip->inode));
+  //printf("Name of file to find == %s\n", name);
+  //printInode(&(mip->inode));
 
   // WALKS THROUGH INODE_TABLE [0 TO 11] (DIRECT BLOCKS)
   for (int index = 0; index < 12; index++)    // defend against table[12, 13, 14]
@@ -306,18 +306,32 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   running->cwd = mip;
 }
 
+// void pwdMainMenu(int dev, MINODE* mip)
+// {
+//   char pathname[DEPTH][NAMELEN];
+//   pwdHelper(dev, mip, pathname);
+//   int i = 0;
+//   while(pathname[i][0] != '\0')
+//   {
+//     if (i != 0)
+//       printf("%s/", pathname[i]);
+//     else
+//       printf("%s", pathname[i]);
+//     i++;
+//   }
+// }
+
 
 void pwd(int dev, MINODE* mip)
 {
   printf("\n");
   char pathname[DEPTH][NAMELEN];
-  sanitizePathname(pathname);
   pwdHelper(dev, mip, pathname);
   int i = 0;
   while(pathname[i][0] != '\0')
   {
     if (i != 0)
-      printf("%s/", pathname[i]);
+      printf("pwd :: /%s/", pathname[i]);
     else
       printf("%s", pathname[i]);
     i++;
