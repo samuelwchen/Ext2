@@ -20,14 +20,14 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSI
 
 
   sscanf(line, "%s %s %s", cmd, input, sourcePath);
-/*
+
   if (strcmp(cmd, "link") == 0 || strcmp(cmd, "symlink") == 0)
   {
     char buf[BLKSIZE] = {'\0'};
     strcpy(buf, sourcePath);
     strcpy(sourcePath, input);
     strcpy(input, buf);
-  }*/
+  }
 
   if (input[0] == '\0')
   {
@@ -99,26 +99,10 @@ int main (int argc, char *argv[])
     printf("main() before call, running->cwd->refCount = %d, ino = %d\n", running->cwd->refCount, running->cwd->ino);
     if (!strcmp(cmd, "test"))
     {
-      // int testNum = 2;
-      // printf("enter inode number you wish to look for:: ");
-      // scanf("%d", &testNum);
-      // //strcpy(name, getNameFromIno(fd, testNum));  //A test
-      // char name[NAMELEN] = {'\0'};
-      // getNameFromIno(fd, testNum, name);  //A test
-      // printf("Name found = %s\n", name);
       printf("IN TESTING AREA\n");
-      //int allocated_bno = balloc(fd);
-      //printf("Allocated block number %d\n", allocated_bno);
-      //int allocated_ino = ialloc(fd);
-      //printf("Allocated inode number %d\n", allocated_ino);
-
-      //idealloc(fd, allocated_ino);
-      //bdealloc(fd, allocated_bno);
       printf("---------------------\n");
       printSuperBlock(fd);
-      my_mkdir(running, root, "testdir!");
-
-      printSuperBlock(fd);
+      printf("No tests currently \n");
     }
     else if (!strcmp(cmd, "pwd"))
       pwd(fd, running->cwd);

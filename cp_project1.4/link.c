@@ -170,8 +170,6 @@ void readLink (int dev, PROC* running, char sym_pathname_arr[DEPTH][NAMELEN])
   {
     debugMode("readLink(): NOT A SYMLINK\n");
   }
-
-
 }
 
 int readSymLink(int dev, PROC* running, MINODE *mip)
