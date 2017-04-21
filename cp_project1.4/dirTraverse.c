@@ -100,7 +100,7 @@ int search (int dev, MINODE *mip, char *name)
     printf("At i_block[%d] = %d\n",index, mip->inode.i_block[i]);
     if(mip->inode.i_block[i] == 0)
       return 0;
-    return searchHelper(dev, i - 11, mip->inode.i_block[i], name);
+    return searchHelper(dev, i-11, mip->inode.i_block[i], i);
   }
 
   // DID NOT FIND TARGET FILE
@@ -114,51 +114,30 @@ Precondition :: all ints must of non-negative.
 Info :: Gets called by search.  recursively searches through
 indirect blocks until block number of interest is found.
 **************************************************/
-int searchHelper(int dev, int level_indirection, int block_num, char *name)
+int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index)
 {
-  char buf[BLKSIZE];
-  char dirName[256];
-
-
-  get_block(dev, block_num, buf);
-
   if (level_indirection == 0)
   {
-    DIR *dp = (DIR*)buf;
-    int i = 0;      // need it outside of for loop because need to have last character in dirName[i] = '\0'
-    while(dp < (DIR*)(buf + BLKSIZE))   // while dp is still inside buffer
-    {
-      for (i = 0; i < dp->name_len; i++)
-      {
-        dirName[i] = dp->name[i];
-      }
-      dirName[i] = '\0';
-
-      printf("Directory Name = %s \n",dirName);
-      if (strcmp(dirName, name) == 0)   // target found
-      {
-        printf("File FOUND.  Inode # = %d\n", dp->inode);
-        printf("--------------------------------------------\n");
-        return dp->inode;
-      }
-
-      dp = (DIR*)((char*)dp + dp->rec_len);
-    }
-    return 0;
+    printf("i_block[%d] \t block_num = %d\n", inode_table_index, block_num);
+    return block_num;
   }
 
   //getting the indirect block
+  char buf[BLKSIZE];
+  int *pIndirect_blk = NULL;
 
-  int *pIndirect_blk = (int*)buf;      //points to the array of block numbers
-  int target_inode = 0;
+  get_block(dev, block_num, buf);
+  pIndirect_blk = (int*)buf;      //points to the array of block numbers
+
   // WALKING THROUGH ALL THE BLOCK NUMBERS IN A BLOCK.
-  for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
+  for (int i = 0; i < BLKSIZE/sizeof(int); i++)
   {
     if (*pIndirect_blk == 0)
       return 0;
-    target_inode = searchHelper(dev, level_indirection-1, *pIndirect_blk, name);
-    if (target_inode != 0)
-      return target_inode;
+    block_num = searchHelper(dev, level_indirection-1, *pIndirect_blk, inode_table_index);
+    if (block_num != 0)
+      return block_num;
+    pIndirect_blk++;
   }
   return 0;
 }
@@ -181,11 +160,8 @@ MINODE* pathnameToMip(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     if (ino == 0)
     {
       printf("Dir path does not exists.\n");
-      iput(mip);
       return NULL;
     }
-    int tempDev = mip->dev;
-    iput(mip);
     mip = iget(mip->dev, ino);
   }
 
@@ -205,16 +181,32 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   DIR *dp = NULL;
   char dirName[NAMELEN];
 
-  printf("ls(): running: %d\n", running->cwd->ino);
+
   mip = pathnameToMip(dev, running, pathname);
-  printf("ls(): running: %d\n", running->cwd->ino);
   if (mip == NULL)
     return;
 
-  printInode(&(mip->inode));     // testing purposes
+  // if ( !strcmp(pathname[0], "/") )
+  //    mip = iget(dev, 2);
+  // else
+  //    mip = iget(running->cwd->dev, running->cwd->ino);
+  //
+  // // convert pathname to (dev, ino);
+  // // get a MINODE *mip pointing at a minode[ ] with (dev, ino);
+  // if (!(pathname[0][0] == '\0'))
+  // {
+  //   ino = getino(mip->dev, running, pathname);
+  //   if (ino == 0)
+  //   {
+  //     printf("Dir path does not exists.\n");
+  //     return;
+  //   }
+  //   mip = iget(mip->dev, ino);
+  // }
+
 
   printf("==================== ls ====================\n");
-  printf("Permissions\tLink Count\tFile Size\tName\n");
+  printf("Permissions\tFile Size\tName\n");
   int i = 0, j = 0;
   char buf[BLKSIZE];
   MINODE* childmip = NULL;
@@ -237,7 +229,6 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
       printf( (childmip->inode.i_mode & S_IROTH) ? "r" : "-");
       printf( (childmip->inode.i_mode & S_IWOTH) ? "w" : "-");
       printf( (childmip->inode.i_mode & S_IXOTH) ? "x\t" : "-\t");
-      printf("%d\t\t", childmip->inode.i_links_count);
       printf("%d\t\t", childmip->inode.i_size);
 
       for (j = 0; j < dp->name_len; j++)
@@ -254,7 +245,6 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     i++;
   }
   printf("===============================================\n");
-  iput(mip);
 }
 /**************************************************
 Precondition :: none
@@ -282,9 +272,7 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     printf("Dir path does not exists.\n");
     return;
   }
-  int tempDev = mip->dev;
-  iput(mip);
-  mip = iget(tempDev, ino);
+  mip = iget(mip->dev, ino);
 
   if(!S_ISDIR(mip->inode.i_mode))
   {
@@ -318,7 +306,6 @@ void pwdHelper(int dev, MINODE* mip)
   char fileName[NAMELEN] = {'\0'};
   getNameFromIno(dev, mip->ino, fileName);
   printf("%s/", fileName);
-  iput(pmip);
 }
 
 /*
@@ -389,7 +376,6 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
 
   MINODE *mip = iget(dev, ino);
   int pino = search(dev, mip, "..");
-  iput(mip);
   mip = iget(dev, pino);
 
     // WALKS THROUGH INODE_TABLE [0 TO 11] (DIRECT BLOCKS)
@@ -431,17 +417,13 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
   {
     printf("At i_block[%d] = %d\n",index, mip->inode.i_block[i]);
     if(mip->inode.i_block[i] == 0)
-    {
-      iput(mip);
       return;
-    }
     getNameFromInoHelper(dev, i-11, mip->inode.i_block[i], ino, fileName);//will return null if not found
-
+    return;
   }
 
   // DID NOT FIND TARGET FILE
   printf("File NOT found.\n");
-  iput(mip);
   return;
 
 }

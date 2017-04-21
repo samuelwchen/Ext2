@@ -3,7 +3,7 @@
 
 #define TRUE 1
 #define FALSE 0
-#define DEBUG_STATUS 0
+#define DEBUG_STATUS FALSE
 
 
 
@@ -60,10 +60,7 @@ typedef struct oft{
 
 typedef struct proc{
   struct proc *next;
-  int          pid;  // if (flag == 1)
-  // {
-  //   *location = '\0';
-  // }
+  int          pid;
   int          uid;
   MINODE      *cwd;
   OFT         *fd[NFD];
@@ -86,17 +83,12 @@ int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN]);
 void checkMagicNumber(int fd);
 void printSuperBlock(int fd);
 void printInode(INODE* ipCur);
-void fillItUp(int dev, PROC* running);
-void fillItUp2(int dev, PROC* running);
-void rpd2(int x, char numbuf[NAMELEN], char *location, int flag);
-void addSingleEntryBlock(int dev, PROC* running);
 
 // found in DIR_TRAVERSE.C
 void sanitizePathname(char pathname[DEPTH][NAMELEN]);
 void parse(char input[STRLEN], char pathname[DEPTH][NAMELEN]);
 int search (int dev, MINODE *mip, char *name);
-int searchHelper(int dev, int level_indirection, int block_num, char *name);
-MINODE* pathnameToMip(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index);
 void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
@@ -133,20 +125,11 @@ void debugMode(char* fmt, ...);
 // found in rmdir.c
 void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 int isDirEmpty(int dev, MINODE* mip);
-void rmEndFile(int dev, DIR* dp, DIR* prevdp, int block_num, char buf[BLKSIZE]);
-//void rmEndFile(int dev, DIR* dp, DIR* prevdp);
+void rmEndFile(int dev, DIR* dp, DIR* prevdp);
 void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange);
-void rmMiddleFile(int dev, DIR *dp, int block_num, char buf[BLKSIZE]);
-//void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
+void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
 void findLastIblock(int dev, int level_indirection, int block_num, int* lastValidBlock);
 
-//LINK.C
-void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN]);
-void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE]);
-void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
-// create.c
-void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
-void createHelper(PROC *running, MINODE *pmip, char *filename);
 
 #endif
