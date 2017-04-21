@@ -50,60 +50,10 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   // DELETION NOW POSSIBLE.  PREPARING TO DELETE
   int pino = search(dev, mip, "..");    // need parent directory
   MINODE *pmip = iget(dev, pino);
-  pmip->inode.i_links_count--;
-  pmip->dirty = 1;
-
-  // DIR *prevdp = NULL;
-  // DIR *dp = NULL;
-  // char buf[BLKSIZE];
-  //
-  //
-  // for (int i = 0; i < 12; i++)
-  // {
-  //   prevdp = NULL;
-  //   get_block(dev, pmip->inode.i_block[i], buf);
-  //   dp = (DIR*)buf;
-  //   while (dp < (DIR*)(buf + BLKSIZE))
-  //   {
-  //     if (mip->ino == dp->inode)    // target dir to delete found!
-  //     {
-  //       // THREE CASES FOR DIRECTORY DELETION
-  //       if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp != NULL)   // target dir is the last entry in that particular datablock AND there are other records in datablock
-  //       {
-  //         rmEndFile(dev, dp, prevdp, pmip->inode.i_block[i], buf);
-  //         //put_block(dev, pmip->inode.i_block[i], buf);
-  //         iput(pmip);
-  //         iput(mip);
-  //         return;
-  //       }
-  //       else if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp == NULL) // target dir is the ONLY entry.  Must find last block to replace it.
-  //       {
-  //         rmOnlyFile(dev, pmip, &(pmip->inode.i_block[i]));
-  //         //put_block(dev, pmip->inode.i_block[i], buf);
-  //         iput(pmip);
-  //         iput(mip);
-  //         return;
-  //       }
-  //       else
-  //       {
-  //         rmMiddleFile(dev, dp, pmip->inode.i_block[i], buf);
-  //         //put_block(dev, pmip->inode.i_block[i], buf);
-  //         iput(pmip);
-  //         iput(mip);
-  //         return;
-  //       }
-  //     }
-  //     prevdp = dp;
-  //     dp = (DIR*)((char*)dp + dp->rec_len);
-  //   }
-  // }
-  //
-  //
-  // // NOT IN DIRECT BLOCKS.  LOOKING AT LEVEL OF INDIRECTION
-  // if (pmip->inode.i_block[12])
-  // {
-  //
-  // }
+  // pmip->inode.i_links_count--;
+  // pmip->dirty = 1;
+  mip->inode.i_links_count--;
+  mip->dirty = 1;
 
   rmDirEntry(dev, pmip, mip);
   iput(pmip);

@@ -35,7 +35,7 @@ void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[N
   // if (i == 0)
   //   strcpy(new_pathname_arr[i], "/");
   // else
-    strcpy(new_pathname_arr[i], "\0");
+  strcpy(new_pathname_arr[i], "\0");
 
 }
 
@@ -68,21 +68,6 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   char new_filename[NAMELEN];
   getChildFileName(new_pathname_arr, new_filename);
 
-
-  //MOVE CHILD OUT OF NEW_PATHNAME_ARR
-  // int i = 0;
-  // for (i; i < DEPTH; i++) //just setting i to the last one
-  // {
-  //   //CHECK IF LAST IN ARRAY
-  //   if (i == (DEPTH -1) || strcmp(new_pathname_arr[i + 1], "\0") == 0 )
-  //   {
-  //     break;
-  //   }
-  // }
-  // char new_filename[NAMELEN];
-  // strcpy(new_filename, new_pathname_arr[i]);
-  // strcpy(new_pathname_arr[i], "\0");
-
   //CHECK IF NEW_PATHNAME_ARR IS VALID PATH
   int pino = 0;
   if(strcmp(new_pathname_arr[0], "\0") == 0)
@@ -94,7 +79,6 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
     pino = getino(dev, running, new_pathname_arr);
   }
 
-  debugMode("symlink(): pino = %d\n", pino);
   if (pino == 0)
   {
     //OLD_PATHNAME_ARR DOES NOT EXISTS - ABORT
