@@ -135,7 +135,42 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   iput(mip);
   iput(pmip);
 }
+/*
+  Gets the last filname in the pathname stored in the SYMLINK minode and puts
+  it in filename.
+  Used to print (symlink -> filename)
+*/
+void readLink (int dev, PROC* running, char sym_pathname_arr[DEPTH][NAMELEN])
+{
+  //GET MINODE OF THE SYMLINK
+  int ino = getino( dev, running, sym_pathname_arr);
+  MINODE *mip = iget(dev, ino);
 
+  //CHECK IF MIP IS A SYMLINK
+  if(S_ISLNK(mip->inode.i_mode))
+  {
+    //GET THE PATHANME FROM THE I_BLOCK[0]
+    char pathname[BLKSIZE] = {'\0'};
+    char pathname_arr[DEPTH][NAMELEN];
+    get_block(mip->dev, mip->inode.i_block[0], pathname);
+
+    iput(mip);
+    //PARSE PATHNAME
+    parse(pathname, pathname_arr);
+
+    //GET LAST FILENAME
+    char filename[NAMELEN] = {'\0'};
+    char linkname[NAMELEN] = {'\0'};
+    getChildFileName(pathname_arr, filename);
+    getChildFileName(sym_pathname_arr, linkname);
+
+    printf("%s -> %s", linkname, filename);
+  }
+  else
+  {
+    debugMode("readLink(): NOT A SYMLINK\n");
+  }
+}
 
 int readSymLink(int dev, PROC* running, MINODE *mip)
 {
@@ -158,7 +193,6 @@ int readSymLink(int dev, PROC* running, MINODE *mip)
   int ino = getino(mip->dev, running, pathname_arr);
   return ino;
 
-  //return 0;
 }
 
 void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
@@ -202,12 +236,5 @@ void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
 
   rmDirEntry(dev, pmip, mip);
-
-
-
-
-
-
-
 
 }
