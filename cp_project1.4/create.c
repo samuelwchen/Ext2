@@ -2,10 +2,6 @@
 
 void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
 {
-  MINODE* mip = pathnameToMip(dev, running, pathname);
-  if (mip == NULL)
-    return;
-
   //GET NEW FILE NAME
   char filename[NAMELEN];
   getChildFileName(pathname, filename);
@@ -20,7 +16,6 @@ void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   {
     //FILE EXISTS ALREADY
     printf("\"%s\" already exists. Aborting mkdir.\n", filename);
-    iput(mip);
     iput(pmip);
     return;
   }
@@ -32,8 +27,8 @@ void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   pmip->inode.i_links_count++;
   //WRITE CHANGES BACK TO MEMORY
   pmip->dirty = 1;
-  mip->dirty = 1;
-  iput(mip);
+  //mip->dirty = 1;
+  //iput(mip);
   iput(pmip);
 }
 
@@ -57,8 +52,8 @@ void createHelper(PROC *running, MINODE *pmip, char *filename)
   ip->i_mode = 100644;      //DIR type and permissions
   ip->i_uid = running->uid; //user's id
   ip->i_gid = 0;            //Group id MAY NEED TO CHANGE
-  ip->i_size = BLKSIZE;
-  ip->i_links_count = 2;    //links for . and ..
+  ip->i_size = 0;
+  ip->i_links_count = 0;    
   ip->i_atime = time(0L);   //set to current time
   ip->i_ctime = ip->i_atime;//set to current time
   ip->i_mtime = ip->i_atime;//set to current time
