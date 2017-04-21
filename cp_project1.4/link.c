@@ -115,6 +115,27 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   ip->i_blocks = 2;         //Linux: blocks count in 512-bytes chunks
   ip->i_block[0] = new_bno;     //Will need for storing the old_pathname
 
+  //CHECK IF OLD_PATHNAME IS RELATIVE
+  if (strcmp(old_pathname_arr[0], "\0") != 0 )
+  {
+    //OLD_PATHNAME IS RELATIVE MAKE ABOSLUTE
+    char cwd_pathname[DEPTH][NAMELEN];
+    pwdHelper(dev, running->cwd, cwd_pathname);
+
+    strcpy(old_pathname_cp, "\0");
+    for (int i = 1; i < DEPTH && cwd_pathname[i][0] != '\0'; i++)
+    {
+      strcat(old_pathname_cp, "/");
+      strcat(old_pathname_cp, cwd_pathname[i]);
+    }
+    for (int i = 0; i < DEPTH && old_pathname_arr[i][0] != '\0'; i++)
+    {
+      strcat(old_pathname_cp, "/");
+      strcat(old_pathname_cp, old_pathname_arr[i]);
+    }
+    printf("_symlink(): Old absolute pathname: %s", old_pathname_cp);
+  }
+
   //INSERT OLD_PATHNAME INTO THE DATABLOCK FOR I_BLOCK[0]
   //We have old_pathname[BLKSIZE], so we can skip copying it to a buf first
   put_block(mip->dev, ip->i_block[0], old_pathname_cp);

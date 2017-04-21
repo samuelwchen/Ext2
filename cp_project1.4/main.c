@@ -1,5 +1,21 @@
 #include "project.h"
 
+void menu(void)
+{
+  printf("----------------------- MENU ---------------------------\n");
+  printf("ls       [pathname]\n");
+  printf("cd        pathname\n");
+  printf("pwd\n");
+  printf("mkdir     pathname\n");
+  printf("rmdir     pathname\n");
+  printf("create    filename\n");
+  printf("link      old_filename    new_filename\n");
+  printf("symlink   old_pathname    new_pathname\n");
+  printf("unlink    pathname\n");
+  printf("quit\n");
+  printf("--------------------------------------------------------\n");
+}
+
 void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSIZE], int dev, PROC *running)
 {
   //char cmd[64], pathname[DEPTH][NAMELEN];
@@ -125,6 +141,8 @@ int main (int argc, char *argv[])
         create (fd, running, pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
+    else if (!strcmp(cmd, "menu"))
+      menu();
 
 
     else if (!strcmp(cmd, "super"))
