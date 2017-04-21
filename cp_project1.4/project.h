@@ -109,7 +109,8 @@ int enter_name_helper(MINODE *pip, int *i_block_ptr, int new_ideal_len, int new_
 // int pwd (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 // int pwdHelper(int dev, char pathname[DEPTH][NAMELEN], MINODE *mip);
 void pwd(int dev, MINODE* mip);
-void pwdHelper(int dev, MINODE* mip);
+int pwdHelper(int dev, MINODE* mip, char pathname[DEPTH][NAMELEN]);
+//void pwdHelper(int dev, MINODE* mip);
 int getNameFromInoHelper(int dev, int level_indirection, int block_num, int ino, char fileName[NAMELEN]);
 void getNameFromIno(int dev, int ino, char fileName[NAMELEN]);
 

@@ -310,26 +310,39 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 void pwd(int dev, MINODE* mip)
 {
   printf("\n");
-  pwdHelper(dev, mip);
+  char pathname[DEPTH][NAMELEN];
+  sanitizePathname(pathname);
+  pwdHelper(dev, mip, pathname);
+  int i = 0;
+  while(pathname[i][0] != '\0')
+  {
+    if (i != 0)
+      printf("%s/", pathname[i]);
+    else
+      printf("%s", pathname[i]);
+    i++;
+  }
   printf("\n");
 }
 
-void pwdHelper(int dev, MINODE* mip)
+int pwdHelper(int dev, MINODE* mip, char pathname[DEPTH][NAMELEN])
 {
   if (mip->ino == 2)
   {
-    printf("Current Directory = /");
-    return;
+    strcpy(pathname[0], "/");
+    return 1;
   }
   // GETTING PARENT mip
   int pino = search(dev, mip, "..");
   MINODE* pmip = iget(dev, pino);
-  pwdHelper(dev, pmip);
+  int i = pwdHelper(dev, pmip, pathname);
 
   char fileName[NAMELEN] = {'\0'};
   getNameFromIno(dev, mip->ino, fileName);
-  printf("%s/", fileName);
+  strcpy(pathname[i], fileName);
+
   iput(pmip);
+  return ++i;
 }
 
 /*
