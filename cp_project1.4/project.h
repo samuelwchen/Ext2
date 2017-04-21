@@ -144,4 +144,9 @@ void findLastIblock(int dev, int level_indirection, int block_num, int* lastVali
 void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN]);
 void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE]);
 void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+
+// create.c
+void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
+void createHelper(PROC *running, MINODE *pmip, char *filename);
+
 #endif

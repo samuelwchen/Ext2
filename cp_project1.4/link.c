@@ -125,8 +125,12 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
 
 void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 {
-  char filename[NAMELEN];
+
   MINODE* mip = pathnameToMip(dev, running, pathname);
+  MINODE* pmip = NULL;
+  char filename[NAMELEN];
+  getChildFileName(pathname, filename);
+  
   if (mip == NULL)
     return;
 
@@ -150,18 +154,9 @@ void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
       return;
     }
 
-    //
-    // if (mip->inode.i_links_count > 1)
-    // {
-    //   printf("Directory is referenced by more than 2 links count.  Currently referenced by %d links.  Cannot delete.\n", mip->inode.i_links_count);
-    //   return;
-    // }
-
-
 
   // DELETION NOW POSSIBLE.  PREPARING TO DELETE
-  MINODE* pmip = NULL;
-  getChildFileName(pathname, filename);
+
   if (strcmp(pathname[0], "\0") == 0)
     pmip = iget(dev, running->cwd->ino);
   else

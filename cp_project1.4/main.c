@@ -134,6 +134,8 @@ int main (int argc, char *argv[])
       _symlink (fd, running, pathname, old_pathname);
     else if (!strcmp(cmd, "unlink"))
        _unlink (fd, running, pathname);
+     else if (!strcmp(cmd, "create"))
+        create (fd, running, pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
 
@@ -148,7 +150,8 @@ int main (int argc, char *argv[])
     else if (!strcmp(cmd, "addSingle"))
       addSingleEntryBlock(fd, running);
 
-
+    else
+      printf("command %s was not recognized.\n\n", cmd);
 
   }
 
