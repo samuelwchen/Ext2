@@ -286,11 +286,22 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   iput(mip);
   mip = iget(tempDev, ino);
 
+  printf("mip->inode.i_mode = %d\n", mip->inode.i_mode);
+
+  if(S_ISLNK(mip->inode.i_mode))
+  {
+    printf("Trying to cd into a symlink\n");
+    ino = readSymLink(dev, running, mip);
+    tempDev = mip->dev;
+    iput(mip);
+    mip = iget(tempDev, ino);
+  }
   if(!S_ISDIR(mip->inode.i_mode))
   {
     printf("Not a Directory\n");
     return;
   }
+  //Add condition for symlink
   iput(running->cwd);
   running->cwd = mip;
 }

@@ -11,7 +11,12 @@
 // //int search (dev, mip, char *name)
 //
 // }
+/*
+  PROBLEM WITH SYMLINK
+  If the pathname saved for the link is not absolute than the readlink
+  will try to start searching for the file in the current working directory
 
+*/
 void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE])
 {
   //CHECKING THE OLD AND NEW PATH NAMES ARE CORRECT
@@ -22,6 +27,8 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   }
   printf("\"\n");
   printf("****old_pathname: \"%s\"", old_pathname);
+  char old_pathname_cp[BLKSIZE];
+  strcpy(old_pathname_cp, old_pathname);//testing this theory
 
   //PARSE OLD_PATHANAME
   char old_pathname_arr[DEPTH][NAMELEN];
@@ -87,7 +94,7 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
 
   //INIT CONTENTS OF (symlink) MIP
   INODE *ip = &(mip->inode);
-  ip->i_mode = 012777;      //Symlink type and permissions
+  ip->i_mode = 0120777;      //Symlink type and permissions
   ip->i_uid = running->uid; //user's id
   ip->i_gid = 0;            //Group id MAY NEED TO CHANGE
   ip->i_size = BLKSIZE;
@@ -100,7 +107,7 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
 
   //INSERT OLD_PATHNAME INTO THE DATABLOCK FOR I_BLOCK[0]
   //We have old_pathname[BLKSIZE], so we can skip copying it to a buf first
-  put_block(mip->dev, ip->i_block[0], old_pathname);
+  put_block(mip->dev, ip->i_block[0], old_pathname_cp);
 
   for (int i = 1; i < 15; i++)
   {
@@ -117,4 +124,28 @@ void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], cha
   //CLEAN UP, CLEAN UP, EVERYBODY DO YOUR PART
   iput(mip);
   iput(pmip);
+}
+
+int readSymLink(int dev, PROC* running, MINODE *mip)
+{
+  //CHECK IF MIP IS A SYMLINK
+  if(!S_ISLNK(mip->inode.i_mode))
+  {
+    printf("Not a symLink. Abort readSymLink.\n");
+    return 0;
+  }
+  //GET THE PATHANME FROM THE I_BLOCK[0]
+  char pathname[BLKSIZE] = {'\0'};
+  char pathname_arr[DEPTH][NAMELEN];
+  get_block(mip->dev, mip->inode.i_block[0], pathname);
+
+  //PARSE PATHNAME
+
+  parse(pathname, pathname_arr);
+
+  //GETINO AND RETURN THE INODE NUMBER THE LINK GOES TO
+  int ino = getino(mip->dev, running, pathname_arr);
+  return ino;
+
+  //return 0;
 }

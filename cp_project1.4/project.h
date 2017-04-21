@@ -142,5 +142,6 @@ void findLastIblock(int dev, int level_indirection, int block_num, int* lastVali
 
 //LINK.C
 void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE]);
+int readSymLink(int dev, PROC* running, MINODE *mip);
 
 #endif

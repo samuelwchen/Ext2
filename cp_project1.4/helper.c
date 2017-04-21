@@ -175,7 +175,7 @@ int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN])
         i++; //don't look for "/"
       printf("===========================================\n");
       printf("pathname[%d]=%s\n", i, pathname[i]);
-
+//add symlink readpathname thing here 
       ino = search(mip->dev, mip, pathname[i]);
 
       if (ino==0)
