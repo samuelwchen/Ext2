@@ -137,8 +137,10 @@ int main (int argc, char *argv[])
       _symlink (fd, running, old_pathname, pathname);
     else if (!strcmp(cmd, "unlink"))
        _unlink (fd, running, pathname);
-     else if (!strcmp(cmd, "create"))
+    else if (!strcmp(cmd, "create"))
         create (fd, running, pathname);
+    else if (!strcmp(cmd, "chmod"))
+       _chmod(fd, running, pathname, old_pathname);
     else if (!strcmp(cmd, "quit"))
       quit();
     else if (!strcmp(cmd, "menu"))

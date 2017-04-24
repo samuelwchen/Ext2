@@ -82,7 +82,7 @@ void mount_root(int dev, MINODE **root);
 int get_itable_begin(int dev, GD *gp);
 MINODE *iget(int dev, int ino);
 void iput(MINODE *mip);
-int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN]);
+int getino(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void checkMagicNumber(int fd);
 void printSuperBlock(int fd);
 void printInode(INODE* ipCur);
@@ -157,5 +157,6 @@ void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
 void createHelper(PROC *running, MINODE *pmip, char *filename);
 
-
+// chmod.c
+void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BLKSIZE]);
 #endif

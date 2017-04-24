@@ -273,6 +273,11 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
   if ( !strcmp(pathname[0], "/") )
      mip = iget(dev, 2);
+  else if (!strcmp(pathname[0], "") )
+  {
+    strcpy(pathname[0], "/");
+    mip = iget(dev, 2);
+  }
   else
      mip = iget(running->cwd->dev, running->cwd->ino);
 
