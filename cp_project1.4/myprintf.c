@@ -130,7 +130,7 @@ void debugMode(char *fmt, ...)
     return;
 
 	char *cp = fmt;	//point cp to the fmt string
-	int *ip = &fmt + 1;	//point at the first item to be printed
+	int *ip = (int*)(&fmt + 1);	//point at the first item to be printed
 	char pType = '\0';	//parameter variable type
 
 	while(*cp != '\0')
@@ -143,7 +143,7 @@ void debugMode(char *fmt, ...)
 			//switch goes here
 			switch(pType){
 				case 'c':
-					putchar(*ip);
+					putchar((char)*ip);
 					break;
 				case 's':
 					prints(*ip);

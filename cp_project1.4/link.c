@@ -39,7 +39,7 @@ void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[N
 
 }
 
-void _symlink(int dev, PROC *running, char new_pathname_arr[DEPTH][NAMELEN], char old_pathname[BLKSIZE])
+void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathname_arr[DEPTH][NAMELEN])
 {
   //CHECKING THE OLD AND NEW PATH NAMES ARE CORRECT
   printf("***new_pathname: \"");

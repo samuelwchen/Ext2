@@ -134,7 +134,7 @@ int main (int argc, char *argv[])
     else if (!strcmp(cmd, "rmdir"))
       rmDir (fd, running, pathname);
     else if (!strcmp(cmd, "symlink"))
-      _symlink (fd, running, pathname, old_pathname);
+      _symlink (fd, running, old_pathname, pathname);
     else if (!strcmp(cmd, "unlink"))
        _unlink (fd, running, pathname);
      else if (!strcmp(cmd, "create"))

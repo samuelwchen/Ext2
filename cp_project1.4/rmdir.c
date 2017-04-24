@@ -60,39 +60,6 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   iput(mip);
 }
 
-void freeBlockHelper(int dev, int level_indirection, int block_num)
-{
-  char buf[BLKSIZE];
-  get_block(dev, block_num, buf);
-  int *pIndirect_blk = (int*)buf;
-
-  if (level_indirection == 1)
-  {
-    for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
-    {
-      if (*pIndirect_blk != 0)
-        bdealloc(dev, *pIndirect_blk);
-      else
-        return;
-    }
-  }
-  else if (level_indirection > 1)
-  {
-    for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
-    {
-      if (*pIndirect_blk != 0)
-        freeBlockHelper(dev, level_indirection - 1, *pIndirect_blk);
-      else
-        return;
-    }
-  }
-  else
-  {
-    printf("freeBlockHelper reached level of indirection = 0.  Should NOT have happened.\n");
-    return;
-  }
-
-}
 void rmDirEntry(int dev, MINODE* pmip, MINODE* mip)
 {
   DIR *prevdp = NULL;
@@ -100,6 +67,7 @@ void rmDirEntry(int dev, MINODE* pmip, MINODE* mip)
   char buf[BLKSIZE];
 
   // last link to be disconnected.  free inode and block_num
+  // this is searches multiple blocks because is used for rmdir and unlink
   if (mip->inode.i_links_count == 1)
   {
     for (int i = 0; i < 12; i++)
@@ -118,6 +86,8 @@ void rmDirEntry(int dev, MINODE* pmip, MINODE* mip)
       freeBlockHelper(dev, i-11, mip->inode.i_block[i]);
     }
   }
+  else
+    return;
 
 
   for (int i = 0; i < 12; i++)
@@ -161,15 +131,15 @@ void rmDirEntry(int dev, MINODE* pmip, MINODE* mip)
   // LEAVING DIRECT BLOCKS.  LOOKING AT LEVEL OF INDIRECTION
   for (int i = 12; i < 15; i++)
   {
-    if (mip->inode.i_block[i] == 0)
+    if (pmip->inode.i_block[i] == 0)
       break;
 
-    rmFileHelper(dev, i-11, mip->inode.i_block[i], dp);
+    rmFileHelper(dev, i-11, pmip->inode.i_block[i], pmip, mip);
   }
 }
 
 
-void rmFileHelper(int dev, int level_indirection, int block_num, MINODE *mip)
+void rmFileHelper(int dev, int level_indirection, int block_num, MINODE *pmip, MINODE *mip)
 {
   char buf[BLKSIZE];
   get_block(dev, block_num, buf);
@@ -177,52 +147,88 @@ void rmFileHelper(int dev, int level_indirection, int block_num, MINODE *mip)
   DIR *dp = (DIR*)buf;
   DIR *prevdp = NULL;
 
-  // if (level_indirection == 0)
-  // {
-  //   while (dp < (DIR*)(buf + BLKSIZE))
-  //   {
-  //     if (mip->ino == dp->inode)    // target dir to delete found!
-  //     {
-  //       // THREE CASES FOR DIRECTORY DELETION
-  //       if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp != NULL)   // target dir is the last entry in that particular datablock AND there are other records in datablock
-  //       {
-  //         rmEndFile(dev, dp, prevdp, block_num, buf);
-  //         //iput(pmip);
-  //         iput(mip);
-  //         return;
-  //       }
-  //       else if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp == NULL) // target dir is the ONLY entry.  Must find last block to replace it.
-  //       {
-  //         rmOnlyFile(dev, pmip, &(block_num));
-  //         //iput(pmip);
-  //         iput(mip);
-  //         return;
-  //       }
-  //       else
-  //       {
-  //         rmMiddleFile(dev, dp, block_num, buf);
-  //         //iput(pmip);
-  //         iput(mip);
-  //         return;
-  //       }
-  //     }
-  //     prevdp = dp;
-  //     dp = (DIR*)((char*)dp + dp->rec_len);
-  //   }
-  // }
-  // else
-  // {
-  //
-  //   for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
-  //   {
-  //     if (*pIndirect_blk != 0)
-  //       rmFileHelper(dev, level_indirection - 1, *pIndirect_blk, mip);
-  //     else
-  //       return;
-  //   }
-  // }
+  if (level_indirection == 0)
+  {
+    while (dp < (DIR*)(buf + BLKSIZE))
+    {
+      if (mip->ino == dp->inode)    // target dir to delete found!
+      {
+        // THREE CASES FOR DIRECTORY DELETION
+        if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp != NULL)   // target dir is the last entry in that particular datablock AND there are other records in datablock
+        {
+          rmEndFile(dev, dp, prevdp, block_num, buf);
+          iput(pmip);
+          iput(mip);
+          return;
+        }
+        else if (((char *)dp + dp->rec_len >= buf + BLKSIZE) && prevdp == NULL) // target dir is the ONLY entry.  Must find last block to replace it.
+        {
+          rmOnlyFile(dev, pmip, &(block_num));
+          iput(pmip);
+          iput(mip);
+          return;
+        }
+        else
+        {
+          rmMiddleFile(dev, dp, block_num, buf);
+          iput(pmip);
+          iput(mip);
+          return;
+        }
+      }
+      prevdp = dp;
+      dp = (DIR*)((char*)dp + dp->rec_len);
+    }
+  }
+  else
+  {
+
+    for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
+    {
+      if (*pIndirect_blk != 0)
+        rmFileHelper(dev, level_indirection - 1, *pIndirect_blk, pmip, mip);
+      else
+        return;
+    }
+  }
 
 }
+
+
+void freeBlockHelper(int dev, int level_indirection, int block_num)
+{
+  char buf[BLKSIZE];
+  get_block(dev, block_num, buf);
+  int *pIndirect_blk = (int*)buf;
+
+  if (level_indirection == 1)
+  {
+    for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
+    {
+      if (*pIndirect_blk != 0)
+        bdealloc(dev, *pIndirect_blk);
+      else
+        return;
+    }
+  }
+  else if (level_indirection > 1)
+  {
+    for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
+    {
+      if (*pIndirect_blk != 0)
+        freeBlockHelper(dev, level_indirection - 1, *pIndirect_blk);
+      else
+        return;
+    }
+  }
+  else
+  {
+    printf("freeBlockHelper reached level of indirection = 0.  Should NOT have happened.\n");
+    return;
+  }
+
+}
+
 /***************************************************************************
 precondition: None
 info: Called by remove dir.  Checks if directory empty by seeing if

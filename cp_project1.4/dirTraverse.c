@@ -214,7 +214,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   printInode(&(mip->inode));     // testing purposes
 
   printf("==================== ls ====================\n");
-  printf("Permissions\tLink Count\tFile Size\tName\n");
+  printf("Permissions\tLink\tSize\tName\n");
   int i = 0, j = 0;
   char buf[BLKSIZE];
   MINODE* childmip = NULL;
@@ -237,8 +237,10 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
       printf( (childmip->inode.i_mode & S_IROTH) ? "r" : "-");
       printf( (childmip->inode.i_mode & S_IWOTH) ? "w" : "-");
       printf( (childmip->inode.i_mode & S_IXOTH) ? "x\t" : "-\t");
-      printf("%d\t\t", childmip->inode.i_links_count);
-      printf("%d\t\t", childmip->inode.i_size);
+      printf("%d\t", childmip->inode.i_links_count);
+      printf("%d\t", childmip->inode.i_size);
+
+      //printf("%s\t", ctime(&(childmip->inode.i_ctime)));
 
       for (j = 0; j < dp->name_len; j++)
       {

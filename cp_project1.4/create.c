@@ -53,7 +53,7 @@ void createHelper(PROC *running, MINODE *pmip, char *filename)
   ip->i_uid = running->uid; //user's id
   ip->i_gid = 0;            //Group id MAY NEED TO CHANGE
   ip->i_size = 0;
-  ip->i_links_count = 0;
+  ip->i_links_count = 1;
   ip->i_atime = time(0L);   //set to current time
   ip->i_ctime = ip->i_atime;//set to current time
   ip->i_mtime = ip->i_atime;//set to current time
