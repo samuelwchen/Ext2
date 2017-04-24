@@ -240,6 +240,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
       printf("%d\t", childmip->inode.i_links_count);
       printf("%d\t", childmip->inode.i_size);
 
+      // commented this line out because ls will create word wrap
       //printf("%s\t", ctime(&(childmip->inode.i_ctime)));
 
       for (j = 0; j < dp->name_len; j++)

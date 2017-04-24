@@ -1,23 +1,47 @@
 #include "project.h"
 
-// void link(int dev, PROC* running, char pathname[DEPTH][NAMELEN], char sourcePath[BLKSIZE])
-// {
-//   char sourcePathName[DEPTH][NAMELEN];
-//   parse(sourcePath, sourcePathName);
-//
-//   MINODE *mip = pathnameToMip(dev, running, sourcePathName);
-//
-//   search()
-// //int search (dev, mip, char *name)
-//
-// }
-/*
-  PROBLEM WITH SYMLINK
-  If the pathname saved for the link is not absolute than the readlink
-  will try to start searching for the file in the current working directory
+void _link(int dev, PROC* running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE])
+{
+  char oldPathNameArray[DEPTH][NAMELEN];
+  parse(oldPath, oldPathNameArray);
 
+  // CHECK TO SEE IF TARGET FILE EXISTS AND IS VALID FOR LINKING
+  MINODE *targetmip = pathnameToMip(dev, running, oldPathNameArray);
 
-*/
+  if (0 == targetmip->ino)
+  {
+    printf("Target path does not exist.  Aborting link.\n");
+    iput(targetmip);
+    return;
+  }
+  if (!S_ISREG(targetmip->inode.i_mode) && !S_ISLNK(targetmip->inode.i_mode))
+  {
+    printf("Target is not a regular file or a link.  Aborting link.\n");
+    iput(targetmip);
+    return;
+  }
+
+  // CHECK TO SEE IF NEW LINK TO BE CREATED IS VALID
+  char new_filename[NAMELEN] = {'\0'};
+  getChildFileName(newPathNameArray, new_filename);
+
+  MINODE *new_mip = pathnameToMip(dev, running, newPathNameArray);
+
+  if(!S_ISDIR(new_mip->inode.i_mode))
+  {
+    printf("Not a valid pathname.  Cannot create link.  Aborting link.\n");
+    iput(new_mip);
+    iput(targetmip);
+    return;
+  }
+
+  // LINKING!
+  enter_name(new_mip, targetmip->ino, new_filename);
+  new_mip->dirty = 1;
+  iput(new_mip);
+  iput(targetmip);
+
+}
 
 void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN])
 {
@@ -50,7 +74,7 @@ void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathn
   printf("\"\n");
   printf("****old_pathname: \"%s\"", old_pathname);
   char old_pathname_cp[BLKSIZE];
-  strcpy(old_pathname_cp, old_pathname);//testing this theory
+  strcpy(old_pathname_cp, old_pathname);//parse function changes old_pathname
 
   //PARSE OLD_PATHANAME
   char old_pathname_arr[DEPTH][NAMELEN];

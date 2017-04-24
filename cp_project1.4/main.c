@@ -9,6 +9,7 @@ void menu(void)
   printf("mkdir     pathname\n");
   printf("rmdir     pathname\n");
   printf("create    filename\n");
+  printf("rm        filename\n");
   printf("link      old_filename    new_filename\n");
   printf("symlink   old_pathname    new_pathname\n");
   printf("unlink    pathname\n");
@@ -135,8 +136,12 @@ int main (int argc, char *argv[])
       rmDir (fd, running, pathname);
     else if (!strcmp(cmd, "symlink"))
       _symlink (fd, running, old_pathname, pathname);
+    else if (!strcmp(cmd, "link"))
+      _link (fd, running, pathname, old_pathname);
     else if (!strcmp(cmd, "unlink"))
-       _unlink (fd, running, pathname);
+      _unlink (fd, running, pathname);
+    else if (!strcmp(cmd, "rm"))
+      _unlink (fd, running, pathname);
     else if (!strcmp(cmd, "create"))
         create (fd, running, pathname);
     else if (!strcmp(cmd, "chmod"))

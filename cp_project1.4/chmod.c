@@ -32,6 +32,7 @@ void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BL
   {
     printf("---------------------------------------------------\n");
     printf ("Path does not exist.  Aborting chmod. /n");
+    iput(mip);
     return;
   }
 
@@ -43,7 +44,10 @@ void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BL
     tempMode = tempMode << 3;
     tempMode = tempMode | permissions[i];
   }
-  mip->inode.i_mode = tempMode;
+
+  mip->inode.i_mode = (u16)tempMode;
+  mip->dirty = 1;
+  iput(mip);
   return;
 
 

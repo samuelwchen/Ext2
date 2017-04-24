@@ -146,11 +146,10 @@ void rmDirEntry(int dev, MINODE* pmip, MINODE* mip);
 
 
 //LINK.C
+void _link(int dev, PROC* running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE]);
 void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN]);
 void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathname_arr[DEPTH][NAMELEN]);
-
 int readSymLink(int dev, PROC* running, MINODE *mip);
-
 void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
 // create.c
