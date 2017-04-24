@@ -338,10 +338,10 @@ void pwd(int dev, MINODE* mip)
   int i = 0;
   while(pathname[i][0] != '\0')
   {
-    if (i != 0)
-      printf("pwd :: /%s/", pathname[i]);
+    if (i == 0)
+      printf("pwd :: %s", pathname[i]);
     else
-      printf("%s", pathname[i]);
+      printf("%s/", pathname[i]);
     i++;
   }
   printf("\n");
