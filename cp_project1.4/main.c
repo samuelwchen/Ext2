@@ -145,6 +145,19 @@ int main (int argc, char *argv[])
         create (fd, running, pathname);
     else if (!strcmp(cmd, "chmod"))
        _chmod(fd, running, pathname, old_pathname);
+    else if (!strcmp(cmd, "pfd"))
+       pfd(fd, running);
+    else if (!strcmp(cmd, "open"))
+       open_file(fd, running, pathname, old_pathname);
+    else if (!strcmp(cmd, "close"))
+    {
+      if (!strcmp(pathname[0], "\0"))
+      {
+        break;
+      }
+      else
+        close_file(fd, running, atoi(pathname[0]));
+    }
     else if (!strcmp(cmd, "quit"))
       quit();
     else if (!strcmp(cmd, "menu"))

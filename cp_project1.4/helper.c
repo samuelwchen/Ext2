@@ -37,7 +37,10 @@ void init (PROC proc[NPROC], MINODE *root)
     //proc[i].fd = NULL;    // not sure if this will work.  should have *fd[NFD] eventually
     for (int j = 0; j < NFD; j++)
     {
-      proc[i].fd[j] = NULL;
+      proc[i].fd[j].mode = 0;
+      proc[i].fd[j].refCount = 0;
+      proc[i].fd[j].mptr = NULL;
+      proc[i].fd[j].offset = 0;
     }
   }
 
@@ -175,7 +178,7 @@ int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN])
         i++; //don't look for "/"
       printf("===========================================\n");
       printf("pathname[%d]=%s\n", i, pathname[i]);
-//add symlink readpathname thing here 
+//add symlink readpathname thing here
       ino = search(mip->dev, mip, pathname[i]);
 
       if (ino==0)

@@ -254,7 +254,7 @@ int bdealloc(int dev, int bno)
 
   // GET IMAP BLOCK NUMBER
   int bmap = gp->bg_block_bitmap;
-  printf("bmap = %d\n", bmap);
+  debugMode("bmap = %d\n", bmap);
 
   // READ inode_bitmap BLOCK
   get_block(dev, bmap, buf);

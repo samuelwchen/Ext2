@@ -63,7 +63,7 @@ typedef struct proc{
   int          pid;
   int          uid;
   MINODE      *cwd;
-  OFT         *fd[NFD];
+  OFT         fd[NFD];
 }PROC;
 
 
@@ -149,10 +149,19 @@ void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathn
 int readSymLink(int dev, PROC* running, MINODE *mip);
 void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
-// create.c
+// create .c
 void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
 void createHelper(PROC *running, MINODE *pmip, char *filename);
 
 // chmod.c
 void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BLKSIZE]);
+
+//open_close.c
+void _truncate(MINODE *mip);
+int open_file(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char mode[BLKSIZE]);
+int determineMode(char mode[BLKSIZE]);
+void pfd(int dev, PROC* running);
+
+
+
 #endif
