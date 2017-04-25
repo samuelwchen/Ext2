@@ -206,6 +206,7 @@ void freeBlockHelper(int dev, int level_indirection, int block_num)
 
   if (level_indirection == 1)
   {
+    //AT THE BLOCKS CONTAINING THE DATABLOCK NUMBERS
     for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
     {
       if (*pIndirect_blk != 0)
@@ -216,6 +217,7 @@ void freeBlockHelper(int dev, int level_indirection, int block_num)
   }
   else if (level_indirection > 1)
   {
+    //STILL IN THE INDIRECT BLOCKS
     for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
     {
       if (*pIndirect_blk != 0)
@@ -226,6 +228,7 @@ void freeBlockHelper(int dev, int level_indirection, int block_num)
   }
   else
   {
+    //INSIDE THE DATABLOCKS - NO BUENO
     printf("freeBlockHelper reached level of indirection = 0.  Should NOT have happened.\n");
     return;
   }

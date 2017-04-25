@@ -121,7 +121,13 @@ int main (int argc, char *argv[])
       printf("IN TESTING AREA\n");
       printf("---------------------\n");
       printSuperBlock(fd);
-      printf("No tests currently \n");
+      printf("No tests currently.\n");
+      // printf("TESTING () \n");
+      // int temp_bno = bnoFromOffset(&(running->fd[0]), (256+256+12));
+      // printf("bno returned: %d\n", temp_bno);
+      char tbuf[BLKSIZE] = {'\0'};
+      int nBytess =  _read(&(running->fd[0]), tbuf, BLKSIZE);
+      printf("bytes read: %d\n", nBytess);
     }
     else if (!strcmp(cmd, "pwd"))
       pwd(fd, running->cwd);

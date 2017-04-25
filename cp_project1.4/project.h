@@ -3,7 +3,7 @@
 
 #define TRUE 1
 #define FALSE 0
-#define DEBUG_STATUS 0
+#define DEBUG_STATUS 1
 
 
 
@@ -161,7 +161,11 @@ void _truncate(MINODE *mip);
 int open_file(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char mode[BLKSIZE]);
 int determineMode(char mode[BLKSIZE]);
 void pfd(int dev, PROC* running);
+void close_file(int dev, PROC *running, int fd_num);
 
+//read_write.c
+int bnoFromOffset(OFT *fd, int lbk);
+int _read(OFT *fd, char *buf, int nbytes);
 
 
 #endif
