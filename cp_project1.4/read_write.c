@@ -117,6 +117,12 @@ void printRead(PROC *running, int fd_num, int nBytes)
     return;
   }
   //CREATE BUF TO PRINT TO SCREEN
+  if (nBytes > oftp->mptr->inode.i_size)
+    nBytes = oftp->mptr->inode.i_size;
+  if (nBytes > MAXINT)
+    nBytes = MAXINT - 1;
+
+
   char buf[nBytes + 1];
 
   for (int i = 0; i < (nBytes + 1); i++)
@@ -129,4 +135,30 @@ void printRead(PROC *running, int fd_num, int nBytes)
 
   printf("%s\n", buf);
   printf("Bytes read = %d\n", bytesRead);
+}
+
+
+void _lseek(PROC *running, int fd_num, int position)
+{
+  // check if valid fd_index
+  if(fd_num < 0 || fd_num >= NFD)
+  {
+    printf("File descriptor number out of bounds. Aborting lseek.\n");
+    return;
+  }
+  if (running->fd[fd_num].refCount <= 0)
+  {
+    printf("Invalid file descriptor chosen. File descriptor %d chosen. Aborting lseek.\n", fd_num);
+    return;
+  }
+
+  // CHECKING IF POSITION IS OUT OF RANGE
+  if (position > running->fd[fd_num].mptr->inode.i_size)
+    position = running->fd[fd_num].mptr->inode.i_size;
+
+  running->fd[fd_num].offset = position;
+
+  printf("-------------------------------------------\n");
+  printf("lseek placed at position %d of file.\n", position);
+  return;
 }

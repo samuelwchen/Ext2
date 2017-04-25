@@ -242,7 +242,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
       // commented this line out because ls will create word wrap
       //printf("%s\t", ctime(&(childmip->inode.i_ctime)));
-      
+
       for (j = 0; j < dp->name_len; j++)
       {
         dirName[j] = dp->name[j];

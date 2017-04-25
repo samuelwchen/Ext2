@@ -176,6 +176,17 @@ int main (int argc, char *argv[])
       else
         printRead(running, atoi(pathname[0]), atoi(old_pathname));
     }
+    else if (!strcmp(cmd, "lseek"))
+    {
+      if (!strcmp(pathname[0], "\0") || !strcmp(old_pathname, "\0"))
+      {
+        printf("Please enter following format \"lseek [file descriptor number] [position of cursor in file]\"\n");
+        break;
+      }
+      else
+        _lseek(running, atoi(pathname[0]), atoi(old_pathname));
+    }
+
     else if (!strcmp(cmd, "quit"))
       quit();
     else if (!strcmp(cmd, "menu"))

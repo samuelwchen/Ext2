@@ -38,7 +38,7 @@ typedef struct ext2_dir_entry_2 DIR;
 #define DEPTH 30
 #define NAMELEN 256
 #define STRLEN BLKSIZE
-
+#define MAXINT 6291456
 
 
 typedef struct minode{
@@ -167,5 +167,5 @@ void close_file(int dev, PROC *running, int fd_num);
 int bnoFromOffset(OFT *fd, int lbk);
 int _read(OFT *fd, char *buf, int nbytes);
 void printRead(PROC *running, int fd_num, int nBytes);
-
+void _lseek(PROC *running, int fd_num, int position);
 #endif

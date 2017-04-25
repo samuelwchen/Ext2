@@ -146,7 +146,7 @@ void debugMode(char *fmt, ...)
 					putchar((char)*ip);
 					break;
 				case 's':
-					prints(*ip);
+					prints((char*)*ip);
 					break;
 				case 'u':
 					printu(*ip);
