@@ -13,6 +13,9 @@ void menu(void)
   printf("link      old_filename    new_filename\n");
   printf("symlink   old_pathname    new_pathname\n");
   printf("unlink    pathname\n");
+  printf("open      pathname        mode\n");
+  printf("close     fd_num\n");
+  printf("read      fd_num          nBytes\n");
   printf("quit\n");
   printf("--------------------------------------------------------\n");
 }
@@ -163,6 +166,15 @@ int main (int argc, char *argv[])
       }
       else
         close_file(fd, running, atoi(pathname[0]));
+    }
+    else if (!strcmp(cmd, "read"))
+    {
+      if (!strcmp(pathname[0], "\0") || !strcmp(old_pathname, "\0"))
+      {
+        break;
+      }
+      else
+        printRead(running, atoi(pathname[0]), atoi(old_pathname));
     }
     else if (!strcmp(cmd, "quit"))
       quit();

@@ -35,17 +35,17 @@ int _read(OFT *fd, char *buf, int nbytes)
     if (nbytes < remaining && nbytes <= avil)
       remaining = nbytes;
     else if (avil < remaining && avil < nbytes)
-      remaining = nbytes;
+      remaining = avil;
 
     //COPY (ACTUAL) REMAINING BYTES INTO BUF
     cp_dbuf = dbuf + start;  //set start pointer
     memcpy(buf, cp_dbuf, remaining);
 
-    debugMode("small check: ");
-    for(int i = 0; i < 10; i++)
-    {
-      debugMode("%c", buf[i]);
-    }debugMode("\n");
+    // debugMode("small check: ");
+    // for(int i = 0; i < 10; i++)
+    // {
+    //   debugMode("%c", buf[i]);
+    // }debugMode("\n");
 
     //UPDATE NBYTES, AVIL, OFFSET, CP_BUF, AND TOTALBYTES
     fd->offset += remaining;
@@ -64,39 +64,69 @@ int bnoFromOffset(OFT *fd, int lbk)
   char buf[BLKSIZE] = {'\0'};
   if(lbk < 12)
   {
-    printf("NOTE: lbk < 12\n");
+    debugMode("NOTE: lbk < 12\n");
     return fd->mptr->inode.i_block[lbk];
   }
   else if(lbk >= 12 && lbk < (256 + 12))
   {
-    printf("NOTE: 12 <= lbk < 256\n");
+    debugMode("NOTE: 12 <= lbk < 256\n");
     //GET INDIRECT BLOCK
     get_block(fd->mptr->dev, fd->mptr->inode.i_block[12], buf);
 
     //FIND INDIRECT BLOCK FROM LBK
     indirectPtr = (int *)buf + (lbk - 12);
 
-    debugMode("Buf = %d, ptr = %d\n", buf, indirectPtr);
+    //debugMode("Buf = %d, ptr = %d\n", buf, indirectPtr);
 
     return *indirectPtr;
   }
   else
   {
-    printf("NOTE: 256 <= lbk < ((256*265) + 256 + 12)\n");
+    debugMode("NOTE: 256 <= lbk < ((256*265) + 256 + 12)\n");
     int level_1_i = (lbk - (256 + 12)) / 256;
     int level_2_i = (lbk - (256 + 12)) % 256;
-    debugMode("level1 = %d, level2 = %d\n", level_1_i, level_2_i);
+    //debugMode("level1 = %d, level2 = %d\n", level_1_i, level_2_i);
     //GET DOUBLE INDIRECT BLOCK
     get_block(fd->mptr->dev, fd->mptr->inode.i_block[13], buf);
     doubleIndirectPtr = (int *)buf + level_1_i;
 
-    debugMode("First block: buf = %d, ptr1 = %d\n", buf, doubleIndirectPtr);
+    //debugMode("First block: buf = %d, ptr1 = %d\n", buf, doubleIndirectPtr);
 
     get_block(fd->mptr->dev, *doubleIndirectPtr, buf);
     doubleIndirectPtr = (int *)buf + level_2_i;
 
-    debugMode("Second block: buf = %d, ptr2 = %d\n", buf, doubleIndirectPtr);
+    //debugMode("Second block: buf = %d, ptr2 = %d\n", buf, doubleIndirectPtr);
 
     return *doubleIndirectPtr;
   }
+}
+
+void printRead(PROC *running, int fd_num, int nBytes)
+{
+  OFT *oftp = &( running->fd[fd_num] );
+  //CHECK FD_num is in range
+  if(fd_num < 0 || fd_num >= NFD)
+  {
+    printf("File descriptor number out of bounds. Aborting close.\n");
+    return;
+  }
+  //CHECK FD[FD_NUM] HAS A VALID FD
+  if (oftp->refCount <= 0)
+  {
+    printf("Invalid file descriptor chosen. File descriptor %d chosen. Aborting close.\n", fd_num);
+    return;
+  }
+  //CREATE BUF TO PRINT TO SCREEN
+  char buf[nBytes + 1];
+
+  for (int i = 0; i < (nBytes + 1); i++)
+  {
+    buf[i] = '\0';
+  }
+
+  int bytesRead = _read(oftp, buf, nBytes);
+  buf[bytesRead] = '\0';
+
+  printf("%s\n", buf);
+  printf("Bytes read = %d\n", bytesRead);
 }

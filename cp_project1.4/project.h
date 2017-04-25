@@ -166,6 +166,6 @@ void close_file(int dev, PROC *running, int fd_num);
 //read_write.c
 int bnoFromOffset(OFT *fd, int lbk);
 int _read(OFT *fd, char *buf, int nbytes);
-
+void printRead(PROC *running, int fd_num, int nBytes);
 
 #endif
