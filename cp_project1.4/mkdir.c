@@ -9,6 +9,11 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
     //ABSOLUTE
     mip = iget (dev, 2);
   }
+  else if (!strcmp(pathname[0], "\0"))
+  {
+    printf("Error: mkdir requires a pathname\n");
+    return;
+  }
   else
   {
     //RELATIVE

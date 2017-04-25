@@ -17,7 +17,7 @@ void menu(void)
   printf("--------------------------------------------------------\n");
 }
 
-void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSIZE], int dev, PROC *running)
+void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSIZE])
 {
   //char cmd[64], pathname[DEPTH][NAMELEN];
   char input[BLKSIZE] = {'\0'};
@@ -115,7 +115,7 @@ int main (int argc, char *argv[])
   {
     sanitizePathname(pathname);
     //pwd(fd, running->cwd);
-    getInput(cmd, pathname, old_pathname, fd, running);
+    getInput(cmd, pathname, old_pathname);
     if (!strcmp(cmd, "test"))
     {
       printf("IN TESTING AREA\n");
