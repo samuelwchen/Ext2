@@ -116,7 +116,6 @@ int main (int argc, char *argv[])
     sanitizePathname(pathname);
     //pwd(fd, running->cwd);
     getInput(cmd, pathname, old_pathname, fd, running);
-    printf("main() before call, running->cwd->refCount = %d, ino = %d\n", running->cwd->refCount, running->cwd->ino);
     if (!strcmp(cmd, "test"))
     {
       printf("IN TESTING AREA\n");

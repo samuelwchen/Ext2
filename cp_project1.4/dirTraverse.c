@@ -242,13 +242,14 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
       // commented this line out because ls will create word wrap
       //printf("%s\t", ctime(&(childmip->inode.i_ctime)));
-
+      
       for (j = 0; j < dp->name_len; j++)
       {
         dirName[j] = dp->name[j];
       }
       dirName[j] = '\0';
       printf("%s\n", dirName);
+
 
       dp = (DIR*)((char*)dp + dp->rec_len);
 
@@ -273,14 +274,18 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   char dirName[NAMELEN];
 
   if ( !strcmp(pathname[0], "/") )
+  {
      mip = iget(dev, 2);
+  }
   else if (!strcmp(pathname[0], "") )
   {
     strcpy(pathname[0], "/");
     mip = iget(dev, 2);
   }
   else
-     mip = iget(running->cwd->dev, running->cwd->ino);
+  {
+    mip = iget(running->cwd->dev, running->cwd->ino);
+  }
 
   // convert pathname to (dev, ino);
   // get a MINODE *mip pointing at a minode[ ] with (dev, ino);
@@ -288,6 +293,7 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   if (ino == 0)
   {
     printf("Dir path does not exists.\n");
+    iput(mip);
     return;
   }
   int tempDev = mip->dev;
@@ -307,11 +313,14 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   if(!S_ISDIR(mip->inode.i_mode))
   {
     printf("Not a Directory\n");
+    iput(mip);
     return;
   }
-  //Add condition for symlink
   iput(running->cwd);
-  running->cwd = mip;
+  running->cwd = iget(mip->dev, mip->ino);
+  iput(mip);
+
+  return;
 }
 
 // void pwdMainMenu(int dev, MINODE* mip)

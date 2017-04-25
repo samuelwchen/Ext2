@@ -31,12 +31,14 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   if (!isDirEmpty(dev, mip))
   {
     printf("Directory is not empty.  Cannot delete.\n");
+    iput(mip);
     return;
   }
 
   if (mip->inode.i_links_count > 2)
   {
     printf("Directory is referenced by more than 2 links count.  Currently referenced by %d links.  Cannot delete.\n", mip->inode.i_links_count);
+    iput(mip);
     return;
   }
 
@@ -44,14 +46,15 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   if (mip->refCount != 1)
   {
     printf("Directory being used by %d other programs.  Cannot delete.\n", mip->refCount - 1);
+    iput(mip);
     return;
   }
 
   // DELETION NOW POSSIBLE.  PREPARING TO DELETE
   int pino = search(dev, mip, "..");    // need parent directory
   MINODE *pmip = iget(dev, pino);
-  // pmip->inode.i_links_count--;
-  // pmip->dirty = 1;
+  pmip->inode.i_links_count--;
+  pmip->dirty = 1;
   mip->inode.i_links_count--;
   mip->dirty = 1;
 
