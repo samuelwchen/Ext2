@@ -4,7 +4,7 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
 {
   MINODE *mip = NULL;
   //POINT MIP TO "STARTING" DIR
-  if( !strcmp(pathname[0], "\0") )
+  if( !strcmp(pathname[0], "/") )
   {
     //ABSOLUTE
     mip = iget (dev, 2);
@@ -12,7 +12,8 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   else
   {
     //RELATIVE
-    mip = running->cwd;
+    mip = iget(running->cwd->dev, running->cwd->ino);
+//    mip = running->cwd;
   }
   //GET NEW DIRECTORY NAME
   int i = 0;
@@ -40,7 +41,7 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   if ( strcmp(pathname[0] ,"\0" ) == 0 )
   {
     //no pathname pip is mip
-    pip = mip;
+    pip = iget(mip->dev, mip->ino);
   }
   else
   {
@@ -55,6 +56,8 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   {
     //NOT A DIR - ABORT
     printf("Path does not exist. Aborting mkdir\n");
+
+    iput(mip);
     iput(pip);
     return;
   }
@@ -64,6 +67,7 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   {
     //FILE EXISTS ALREADY
     printf("\"%s\" already exists. Aborting mkdir.\n", new_dir_name);
+    iput(mip);
     iput(pip);
     return;
   }
@@ -74,6 +78,8 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   pip->inode.i_links_count++;
   //WRITE CHANGES BACK TO MEMORY
   pip->dirty = 1;
+  mip->dirty = 1;
+  iput(mip);
   iput(pip);
 }
 
@@ -188,7 +194,7 @@ int enter_name(MINODE *pip, int new_ino, char *new_name)
       indirect1_blk_ptr = (int *)indirect1_blk_buf;
 
       //WALK THROUGH INDIRECT BLOCK
-      while (indirect1_blk_ptr < (indirect1_blk_buf + BLKSIZE) )
+      while (indirect1_blk_ptr < (int*)(indirect1_blk_buf + BLKSIZE) )
       {
         name_entered = enter_name_helper(pip, indirect1_blk_ptr, new_ideal_len, new_name_len, new_name, new_ino);
         if (name_entered == 1)

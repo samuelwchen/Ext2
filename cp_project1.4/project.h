@@ -3,7 +3,7 @@
 
 #define TRUE 1
 #define FALSE 0
-#define DEBUG_STATUS FALSE
+#define DEBUG_STATUS 0
 
 
 
@@ -60,7 +60,10 @@ typedef struct oft{
 
 typedef struct proc{
   struct proc *next;
-  int          pid;
+  int          pid;  // if (flag == 1)
+  // {
+  //   *location = '\0';
+  // }
   int          uid;
   MINODE      *cwd;
   OFT         *fd[NFD];
@@ -79,16 +82,21 @@ void mount_root(int dev, MINODE **root);
 int get_itable_begin(int dev, GD *gp);
 MINODE *iget(int dev, int ino);
 void iput(MINODE *mip);
-int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN]);
+int getino(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void checkMagicNumber(int fd);
 void printSuperBlock(int fd);
 void printInode(INODE* ipCur);
+void fillItUp(int dev, PROC* running);
+void fillItUp2(int dev, PROC* running);
+void rpd2(int x, char numbuf[NAMELEN], char *location, int flag);
+void addSingleEntryBlock(int dev, PROC* running);
 
 // found in DIR_TRAVERSE.C
 void sanitizePathname(char pathname[DEPTH][NAMELEN]);
 void parse(char input[STRLEN], char pathname[DEPTH][NAMELEN]);
 int search (int dev, MINODE *mip, char *name);
-int searchHelper(int dev, int level_indirection, int block_num, int inode_table_index);
+int searchHelper(int dev, int level_indirection, int block_num, char *name);
+MINODE* pathnameToMip(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
@@ -101,7 +109,8 @@ int enter_name_helper(MINODE *pip, int *i_block_ptr, int new_ideal_len, int new_
 // int pwd (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 // int pwdHelper(int dev, char pathname[DEPTH][NAMELEN], MINODE *mip);
 void pwd(int dev, MINODE* mip);
-void pwdHelper(int dev, MINODE* mip);
+int pwdHelper(int dev, MINODE* mip, char pathname[DEPTH][NAMELEN]);
+//void pwdHelper(int dev, MINODE* mip);
 int getNameFromInoHelper(int dev, int level_indirection, int block_num, int ino, char fileName[NAMELEN]);
 void getNameFromIno(int dev, int ino, char fileName[NAMELEN]);
 
@@ -125,11 +134,28 @@ void debugMode(char* fmt, ...);
 // found in rmdir.c
 void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 int isDirEmpty(int dev, MINODE* mip);
-void rmEndFile(int dev, DIR* dp, DIR* prevdp);
+void rmEndFile(int dev, DIR* dp, DIR* prevdp, int block_num, char buf[BLKSIZE]);
+void rmFileHelper(int dev, int level_indirection, int block_num, MINODE *pmip, MINODE *mip);
+void freeBlockHelper(int dev, int level_indirection, int block_num);
+//void rmEndFile(int dev, DIR* dp, DIR* prevdp);
 void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange);
-void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
+void rmMiddleFile(int dev, DIR *dp, int block_num, char buf[BLKSIZE]);
+//void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
 void findLastIblock(int dev, int level_indirection, int block_num, int* lastValidBlock);
+void rmDirEntry(int dev, MINODE* pmip, MINODE* mip);
 
 
+//LINK.C
+void _link(int dev, PROC* running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE]);
+void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN]);
+void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathname_arr[DEPTH][NAMELEN]);
+int readSymLink(int dev, PROC* running, MINODE *mip);
+void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
+// create.c
+void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
+void createHelper(PROC *running, MINODE *pmip, char *filename);
+
+// chmod.c
+void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BLKSIZE]);
 #endif
