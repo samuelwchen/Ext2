@@ -60,10 +60,7 @@ typedef struct oft{
 
 typedef struct proc{
   struct proc *next;
-  int          pid;  // if (flag == 1)
-  // {
-  //   *location = '\0';
-  // }
+  int          pid;
   int          uid;
   MINODE      *cwd;
   OFT         *fd[NFD];
