@@ -3,7 +3,7 @@
 
 #define TRUE 1
 #define FALSE 0
-#define DEBUG_STATUS 1
+#define DEBUG_STATUS 0
 
 
 
