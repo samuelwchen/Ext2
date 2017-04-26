@@ -174,6 +174,7 @@ void screen_write(PROC *running, int fd_num, char *buf);
 
 //mv_cp.c
 void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE]);
+void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE]);
 
 
 

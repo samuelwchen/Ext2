@@ -57,7 +57,8 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSI
     sscanf(line, "%s %s %s", cmd, input, sourcePath);
   }
 
-  if (strcmp(cmd, "link") == 0 || strcmp(cmd, "symlink") == 0  || strcmp(cmd, "mv") == 0)
+  if (strcmp(cmd, "link") == 0 || strcmp(cmd, "symlink") == 0  ||
+      strcmp(cmd, "mv") == 0 || strcmp(cmd, "cp") == 0)
   {
     char buf[BLKSIZE] = {'\0'};
     strcpy(buf, sourcePath);
@@ -175,6 +176,8 @@ int main (int argc, char *argv[])
        pfd(fd, running);
     else if (!strcmp(cmd, "mv"))
        mv(fd, running, pathname, old_pathname);
+    else if (!strcmp(cmd, "cp"))
+       copy(fd, running, pathname, old_pathname);
     else if (!strcmp(cmd, "open"))
        open_file(fd, running, pathname, old_pathname);
     else if (!strcmp(cmd, "close"))
