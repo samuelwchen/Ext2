@@ -122,19 +122,45 @@ void printRead(PROC *running, int fd_num, int nBytes)
   if (nBytes > MAXINT)
     nBytes = MAXINT - 1;
 
+  printf("testing - inode i size = %d", oftp->mptr->inode.i_size);
 
-  char buf[nBytes + 1];
+  //char buf[nBytes + 1];
+  char buf[BLKSIZE+1];
+  int bytesRead = 0;
 
-  for (int i = 0; i < (nBytes + 1); i++)
+//  for (int i = 0; i < (nBytes + 1); i++)
+  for (int i = 0; i < BLKSIZE+1; i++)
   {
     buf[i] = '\0';
   }
 
-  int bytesRead = _read(oftp, buf, nBytes);
-  buf[bytesRead] = '\0';
 
-  printf("%s\n", buf);
+  while (nBytes > 0)
+  {
+    int bytesReadInBlk = 0;
+    if (nBytes < BLKSIZE)
+    {
+      bytesReadInBlk = _read(oftp, buf, nBytes);
+      bytesRead += bytesReadInBlk;
+      nBytes -= bytesReadInBlk;
+
+      buf[nBytes] = '\0';
+    }
+    else
+    {
+      bytesReadInBlk = _read(oftp, buf, BLKSIZE);
+      bytesRead += bytesReadInBlk;
+      nBytes -= bytesReadInBlk;
+
+      buf[BLKSIZE] = '\0';
+    }
+    printf("%s", buf);
+
+  }
+
+  printf("\n--------------------------------------------\n");
   printf("Bytes read = %d\n", bytesRead);
+  return;
 }
 
 
