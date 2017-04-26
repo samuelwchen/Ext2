@@ -178,6 +178,8 @@ int main (int argc, char *argv[])
        mv(fd, running, pathname, old_pathname);
     else if (!strcmp(cmd, "cp"))
        copy(fd, running, pathname, old_pathname);
+    else if (!strcmp(cmd, "cat"))
+       cat(fd, running, pathname);
     else if (!strcmp(cmd, "open"))
        open_file(fd, running, pathname, old_pathname);
     else if (!strcmp(cmd, "close"))
@@ -233,7 +235,8 @@ int main (int argc, char *argv[])
       fillItUp2(fd, running);
     else if (!strcmp(cmd, "addSingle"))
       addSingleEntryBlock(fd, running);
-
+      else if (!strcmp(cmd, "smin"))
+        showMinode();
     else
       printf("command %s was not recognized.\n\n", cmd);
 

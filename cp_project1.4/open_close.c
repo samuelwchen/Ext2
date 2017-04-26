@@ -56,6 +56,11 @@ int open_file(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char mode[B
 
   //GET INO THEN MIP OF PATHNAME
   int ino =  getino(dev, running, pathname);
+  if (ino == 0)
+  {
+    printf("Invalid file.  Aborting open.");
+    return -1;
+  }
   MINODE *mip = iget(dev, ino);
 
   //CHECK IF REG FILE (IF NOT, ABORT)

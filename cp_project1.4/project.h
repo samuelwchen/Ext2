@@ -87,6 +87,7 @@ void fillItUp(int dev, PROC* running);
 void fillItUp2(int dev, PROC* running);
 void rpd2(int x, char numbuf[NAMELEN], char *location, int flag);
 void addSingleEntryBlock(int dev, PROC* running);
+void showMinode (void);
 
 // found in DIR_TRAVERSE.C
 void sanitizePathname(char pathname[DEPTH][NAMELEN]);
@@ -176,6 +177,8 @@ void screen_write(PROC *running, int fd_num, char *buf);
 void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE]);
 void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE]);
 
+// cat.c
+void cat (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
 
 #endif

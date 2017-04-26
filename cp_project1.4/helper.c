@@ -413,3 +413,14 @@ void addSingleEntryBlock(int dev, PROC* running)
   pip->inode.i_block[1] = bno;
   iput(pip);
 }
+
+void showMinode (void)
+{
+  printf("---------- SHOWING MINODE TABLE ----------\n");
+  for (int i = 0; i < NMINODE; i++)
+  {
+    if (minode_table[i].refCount != 0)
+      printf ("minode[%d] = %d.\t\tRefCount = %d\n", i, minode_table[i].ino, minode_table[i].refCount);
+  }
+  printf("------------------------------------------\n");
+}

@@ -127,7 +127,6 @@ void printRead(PROC *running, int fd_num, int nBytes)
   if (nBytes > MAXINT)
     nBytes = MAXINT - 1;
 
-  printf("testing - inode i size = %d", oftp->mptr->inode.i_size);
 
   //char buf[nBytes + 1];
   char buf[BLKSIZE+1];
