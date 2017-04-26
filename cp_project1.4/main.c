@@ -41,9 +41,22 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSI
   // printf("]: ");
   fgets(line, 128, stdin );
 
-
-  sscanf(line, "%s %s %s", cmd, input, sourcePath);
-
+  if(line[0] == 'w' && line[1] == 'r' && line[2] == 'i'
+      && line[3] == 't' && line[4] == 'e')
+  {
+    char *pch = NULL;
+    pch = strtok(line, " ");
+    strcpy(cmd, pch);
+    pch = strtok(NULL, " ");
+    strcpy(input, pch);
+    pch = strtok(NULL, "\0");
+    strcpy(sourcePath, pch);
+  }
+  else
+  {
+    sscanf(line, "%s %s %s", cmd, input, sourcePath);
+  }
+  
   if (strcmp(cmd, "link") == 0 || strcmp(cmd, "symlink") == 0)
   {
     char buf[BLKSIZE] = {'\0'};
@@ -128,8 +141,12 @@ int main (int argc, char *argv[])
       // printf("TESTING () \n");
       // int temp_bno = bnoFromOffset(&(running->fd[0]), (256+256+12));
       // printf("bno returned: %d\n", temp_bno);
-      char tbuf[BLKSIZE] = {'\0'};
-      int nBytess =  _read(&(running->fd[0]), tbuf, BLKSIZE);
+      // char tbuf[BLKSIZE] = {'\0'};
+      // int nBytess =  _read(&(running->fd[0]), tbuf, BLKSIZE);
+      // printf("bytes read: %d\n", nBytess);
+
+      char *tbuf = "Hello World\n";
+      int nBytess =  _write(&(running->fd[0]), tbuf, 12);
       printf("bytes read: %d\n", nBytess);
     }
     else if (!strcmp(cmd, "pwd"))
@@ -175,6 +192,15 @@ int main (int argc, char *argv[])
       }
       else
         printRead(running, atoi(pathname[0]), atoi(old_pathname));
+    }
+    else if (!strcmp(cmd, "write"))
+    {
+      if (!strcmp(pathname[0], "\0") || !strcmp(old_pathname, "\0"))
+      {
+        break;
+      }
+      else
+        screen_write(running, atoi(pathname[0]), old_pathname);
     }
     else if (!strcmp(cmd, "lseek"))
     {
