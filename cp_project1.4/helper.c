@@ -176,7 +176,7 @@ int getino(int dev,PROC *running, char pathname[DEPTH][NAMELEN])
   {
       if ( !strcmp(pathname[i], "/") )
         i++; //don't look for "/"
-      printf("===========================================\n");
+      printf("--------------------------------------------------------\n");
       printf("pathname[%d]=%s\n", i, pathname[i]);
 //add symlink readpathname thing here
       ino = search(mip->dev, mip, pathname[i]);
@@ -225,7 +225,7 @@ void printSuperBlock(int fd)
   get_block(fd, 1, buf);
   SUPER *sp = (SUPER *)buf;
 
-  printf("=================== Super Block Contents ==================\n");
+  printf("================== Super Block Contents ==================\n");
   printf("s_inodes_count \t\t\t\t\t%d\n", sp->s_inodes_count);
   printf("s_blocks_count \t\t\t\t\t%d\n", sp->s_blocks_count);
   printf("s_free_inodes_count \t\t\t\t%d\n", sp->s_free_inodes_count);
@@ -235,17 +235,18 @@ void printSuperBlock(int fd)
   printf("s_inodes_per_group \t\t\t\t%d\n", sp->s_inodes_per_group);
   printf("s_magic \t\t\t\t\t%x\n", (sp->s_magic));
   printf("\n");
+  printf("========================================================\n");
+
 }
 
 void printInode(INODE* ipCur)
 {
   debugMode("printInode()\n");
-  printf("=================== Inode Contents ==================\n");
-  //printf("i_mode \t\t\t\t\t%hu\n", ipCur->imode);
+  printf("==================== Inode Contents ====================\n");
   printf("i_uid \t\t\t\t\t%d\n", ipCur->i_uid);
   printf("i_gid \t\t\t\t\t%d\n", ipCur->i_gid);
   printf("i_size (in bytes) \t\t\t%d\n", ipCur->i_size);
-  printf("-------------- disc blocks in inode iblocks table --------------\n");
+  printf("---------- disc blocks in inode iblocks table ----------\n");
   for (int i = 0; i < 15; i++)
     printf("block[%d] = %d\n", i, ipCur->i_block[i]);
   printf("\n");
@@ -416,11 +417,11 @@ void addSingleEntryBlock(int dev, PROC* running)
 
 void showMinode (void)
 {
-  printf("---------- SHOWING MINODE TABLE ----------\n");
+  printf("----------------- SHOWING MINODE TABLE -----------------\n");
   for (int i = 0; i < NMINODE; i++)
   {
     if (minode_table[i].refCount != 0)
       printf ("minode[%d] = %d.\t\tRefCount = %d\n", i, minode_table[i].ino, minode_table[i].refCount);
   }
-  printf("------------------------------------------\n");
+  printf("--------------------------------------------------------\n");
 }

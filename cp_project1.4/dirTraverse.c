@@ -62,7 +62,7 @@ int search (int dev, MINODE *mip, char *name)
   for (int index = 0; index < 12; index++)    // defend against table[12, 13, 14]
   {
     iblock = mip->inode.i_block[index];
-    printf("--------------------------------------------\n");
+    printf("--------------------------------------------------------\n");
     printf("At i_block[%d] = %d\n", index, iblock);
     get_block(dev, iblock, buf);
 
@@ -86,7 +86,7 @@ int search (int dev, MINODE *mip, char *name)
       if (strcmp(dirName, name) == 0)   // target found
       {
         printf("File FOUND.  Inode # = %d\n", dp->inode);
-        printf("--------------------------------------------\n");
+        printf("--------------------------------------------------------\n");
         return dp->inode;
       }
 
@@ -138,7 +138,7 @@ int searchHelper(int dev, int level_indirection, int block_num, char *name)
       if (strcmp(dirName, name) == 0)   // target found
       {
         printf("File FOUND.  Inode # = %d\n", dp->inode);
-        printf("--------------------------------------------\n");
+        printf("--------------------------------------------------------\n");
         return dp->inode;
       }
 
@@ -213,7 +213,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
   printInode(&(mip->inode));     // testing purposes
 
-  printf("==================== ls ====================\n");
+  printf("========================== ls ==========================\n");
   printf("Permissions\tLink\tSize\tName\n");
   int i = 0, j = 0;
   char buf[BLKSIZE];
@@ -257,7 +257,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     }
     i++;
   }
-  printf("===============================================\n");
+  printf("========================================================\n");
   iput(mip);
 }
 /**************************************************
@@ -322,22 +322,6 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
   return;
 }
-
-// void pwdMainMenu(int dev, MINODE* mip)
-// {
-//   char pathname[DEPTH][NAMELEN];
-//   pwdHelper(dev, mip, pathname);
-//   int i = 0;
-//   while(pathname[i][0] != '\0')
-//   {
-//     if (i != 0)
-//       printf("%s/", pathname[i]);
-//     else
-//       printf("%s", pathname[i]);
-//     i++;
-//   }
-// }
-
 
 void pwd(int dev, MINODE* mip)
 {
@@ -473,7 +457,8 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
       if (dp->inode == ino)   // target found
       {
         printf("File FOUND.  Inode # = %d, name = %s\n", dp->inode, fileName);
-        printf("--------------------------------------------\n");
+        printf("--------------------------------------------------------\n");
+
         return;
       }
 
@@ -484,7 +469,7 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
   // WALKS THROUGH INODE_TABLE [12 TO 14] (INDIRECT BLOCKS)
   for (int i = 12; i < 15; i++)
   {
-    printf("At i_block[%d] = %d\n",index, mip->inode.i_block[i]);
+    printf("At i_block[%d] = %d\n", index, mip->inode.i_block[i]);
     if(mip->inode.i_block[i] == 0)
     {
       iput(mip);

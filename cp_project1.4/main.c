@@ -30,15 +30,16 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSI
 
   sanitizePathname(pathname);
 
-  printf("-------------------------------------------\n");
 
   //GET INPUT
-  //pwd(dev, running->cwd);
-  printf("[ls, pwd, cd, mkdir, test, quit]\n");
+  printf("========================= MENU =========================\n");
+  printf("[ls \tpwd \tmkdir \topen \tread \tsymlink \t]\n");
+  printf("[cd \tpfd \trmdir \tclose \twrite \tlink \tmenu\t]\n");
+  printf("[mv \tcp \tcat \tchmod \tcreate \tunlink \tquit \t]\n");
+  printf("========================================================\n");
+
   printf("Enter command [pathname]: ");
-  // printf("Enter command [");
-  // pwdMainMenu(dev, running->cwd);
-  // printf("]: ");
+
   fgets(line, 128, stdin );
 
   if(line[0] == 'w' && line[1] == 'r' && line[2] == 'i'
@@ -68,7 +69,7 @@ void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSI
 
   if (input[0] == '\0')
   {
-    printf("input null\n");
+    //printf("input null\n");
     return;
   }
   parse(input, pathname);
@@ -219,16 +220,14 @@ int main (int argc, char *argv[])
       else
         _lseek(running, atoi(pathname[0]), atoi(old_pathname));
     }
-
     else if (!strcmp(cmd, "quit"))
       quit();
     else if (!strcmp(cmd, "menu"))
       menu();
 
-
+    // HELPER TEST FUNCTIONS
     else if (!strcmp(cmd, "super"))
       printSuperBlock(fd);
-
     else if (!strcmp(cmd, "fill"))
       fillItUp(fd, running);
     else if (!strcmp(cmd, "fill2"))

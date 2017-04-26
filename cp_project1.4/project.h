@@ -103,12 +103,8 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
 void my_mkdir(PROC *running, MINODE *pip, char *new_name);
 int enter_name(MINODE *pip, int new_ino, char *new_name);
 int enter_name_helper(MINODE *pip, int *i_block_ptr, int new_ideal_len, int new_name_len, char *new_name, int new_ino);
-
-// int pwd (int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
-// int pwdHelper(int dev, char pathname[DEPTH][NAMELEN], MINODE *mip);
 void pwd(int dev, MINODE* mip);
 int pwdHelper(int dev, MINODE* mip, char pathname[DEPTH][NAMELEN]);
-//void pwdHelper(int dev, MINODE* mip);
 int getNameFromInoHelper(int dev, int level_indirection, int block_num, int ino, char fileName[NAMELEN]);
 void getNameFromIno(int dev, int ino, char fileName[NAMELEN]);
 
@@ -135,10 +131,8 @@ int isDirEmpty(int dev, MINODE* mip);
 void rmEndFile(int dev, DIR* dp, DIR* prevdp, int block_num, char buf[BLKSIZE]);
 void rmFileHelper(int dev, int level_indirection, int block_num, MINODE *pmip, MINODE *mip);
 void freeBlockHelper(int dev, int level_indirection, int block_num);
-//void rmEndFile(int dev, DIR* dp, DIR* prevdp);
 void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange);
 void rmMiddleFile(int dev, DIR *dp, int block_num, char buf[BLKSIZE]);
-//void rmMiddleFile(int dev, DIR *dp, char buf[BLKSIZE]);
 void findLastIblock(int dev, int level_indirection, int block_num, int* lastValidBlock);
 void rmDirEntry(int dev, MINODE* pmip, MINODE* mip);
 

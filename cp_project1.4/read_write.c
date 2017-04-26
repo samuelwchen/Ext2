@@ -41,12 +41,6 @@ int _read(OFT *fd, char *buf, int nbytes)
     cp_dbuf = dbuf + start;  //set start pointer
     memcpy(buf, cp_dbuf, remaining);
 
-    // debugMode("small check: ");
-    // for(int i = 0; i < 10; i++)
-    // {
-    //   debugMode("%c", buf[i]);
-    // }debugMode("\n");
-
     //UPDATE NBYTES, AVIL, OFFSET, CP_BUF, AND TOTALBYTES
     fd->offset += remaining;
     avil -= remaining;
@@ -76,8 +70,6 @@ int bnoFromOffset(OFT *fd, int lbk)
     //FIND INDIRECT BLOCK FROM LBK
     indirectPtr = (int *)buf + (lbk - 12);
 
-    //debugMode("Buf = %d, ptr = %d\n", buf, indirectPtr);
-
     return *indirectPtr;
   }
   else
@@ -85,8 +77,6 @@ int bnoFromOffset(OFT *fd, int lbk)
     debugMode("NOTE: 256 <= lbk < ((256*265) + 256 + 12)\n");
     int level_1_i = (lbk - (256 + 12)) / 256;
     int level_2_i = (lbk - (256 + 12)) % 256;
-    //debugMode("level1 = %d, level2 = %d\n", level_1_i, level_2_i);
-    //GET DOUBLE INDIRECT BLOCK
     get_block(fd->mptr->dev, fd->mptr->inode.i_block[13], buf);
     doubleIndirectPtr = (int *)buf + level_1_i;
 
@@ -158,8 +148,9 @@ void printRead(PROC *running, int fd_num, int nBytes)
 
   }
 
-  printf("\n--------------------------------------------\n");
+  printf("--------------------------------------------------------\n");
   printf("Bytes read = %d\n", bytesRead);
+  printf("--------------------------------------------------------\n");
   return;
 }
 
@@ -184,8 +175,9 @@ void _lseek(PROC *running, int fd_num, int position)
 
   running->fd[fd_num].offset = position;
 
-  printf("-------------------------------------------\n");
+  printf("--------------------------------------------------------\n");
   printf("lseek placed at position %d of file.\n", position);
+  printf("--------------------------------------------------------\n");
   return;
 }
 

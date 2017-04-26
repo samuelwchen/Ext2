@@ -147,12 +147,12 @@ int determineMode(char mode[BLKSIZE])
 
 void pfd(int dev, PROC* running)
 {
-    printf("======================= PFD =======================\n");
+  printf("========================= PFD ==========================\n");
   printf("FD\tMode\tRefCount\tino\toffset\n");
   for (int i = 0; i < NFD; i++)
     if (running->fd[i].refCount != 0)
       printf("%d\t%d\t%d\t\t%d\t%d\n", i, running->fd[i].mode, running->fd[i].refCount, running->fd[i].mptr->ino, running->fd[i].offset);
-  //printf("-------------------------------------------\n");
+  printf("--------------------------------------------------------\n");
   return;
 }
 
