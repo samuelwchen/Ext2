@@ -85,7 +85,7 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
   }
   if (!S_ISREG(old_mip->inode.i_mode) && !S_ISLNK(old_mip->inode.i_mode))
   {
-    printf("Target is not a regular file or a link.  Aborting mv.\n");
+    printf("Target is not a regular file or a link.  Aborting cp.\n");
     iput(old_mip);
     return;
   }
@@ -95,7 +95,7 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
   {
     if (running->fd[i].refCount != 0 && running->fd[i].mptr->ino == old_mip->ino  && running->fd[i].mode > 0 )
     {
-      printf("File already opened.  Aborting mv.\n");
+      printf("File already opened.  Aborting cp.\n");
       iput(old_mip);
       return ;
     }
@@ -109,7 +109,7 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
 
   if(!S_ISDIR(new_mip->inode.i_mode))
   {
-    printf("Not a valid pathname.  Cannot create link.  Aborting mv.\n");
+    printf("Not a valid pathname.  Cannot copy a directory.  Aborting cp.\n");
     iput(new_mip);
     iput(old_mip);
     return;
@@ -119,7 +119,7 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
   int ino = search (dev, new_mip, new_filename);
   if (ino != 0)
   {
-    printf("Target filename already exists.  Aborting mv.\n");
+    printf("Target filename already exists.  Aborting cp.\n");
     iput(new_mip);
     iput(old_mip);
     return;
@@ -176,5 +176,10 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
   new_mip->dirty = 1;
   iput(new_mip);
   iput(old_mip);
+
+//close the files
+  close_file(dev, running, new_fd);
+  close_file(dev, running, old_fd);
+
   return;
 }

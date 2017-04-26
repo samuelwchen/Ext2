@@ -16,8 +16,22 @@ void menu(void)
   printf("open      pathname        mode\n");
   printf("close     fd_num\n");
   printf("read      fd_num          nBytes\n");
+  printf("pfd \n");
+  printf("cp        old_filename    new_filename\n");
+  printf("mv        old_filename    new_filename\n");
+
+  printf("cat       filename\n");
+  printf("chmod     pathname    \n");
+
   printf("quit\n");
   printf("--------------------------------------------------------\n");
+  //
+  // printf("========================= MENU =========================\n");
+  // printf("[ls \tpwd \tmkdir \topen \tread \tsymlink \t]\n");
+  // printf("[cd \tpfd \trmdir \tclose \twrite \tlink \tmenu\t]\n");
+  // printf("[mv \tcp \tcat \tchmod \tcreate \tunlink \tquit \t]\n");
+  // printf("========================================================\n");
+
 }
 
 void getInput(char cmd[64], char pathname[DEPTH][NAMELEN], char sourcePath[BLKSIZE])
