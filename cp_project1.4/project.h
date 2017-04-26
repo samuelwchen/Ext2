@@ -170,4 +170,11 @@ void printRead(PROC *running, int fd_num, int nBytes);
 void _lseek(PROC *running, int fd_num, int position);
 int _write(OFT *fd, char *buf, int nbytes);
 void screen_write(PROC *running, int fd_num, char *buf);
+
+
+//mv_cp.c
+void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE]);
+
+
+
 #endif

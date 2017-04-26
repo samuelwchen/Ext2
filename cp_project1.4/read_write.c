@@ -116,6 +116,11 @@ void printRead(PROC *running, int fd_num, int nBytes)
     printf("Invalid file descriptor chosen. File descriptor %d chosen. Aborting close.\n", fd_num);
     return;
   }
+  if (oftp->mode != 0 && oftp->mode != 2)
+  {
+    printf("File in incorrect mode.  Must be r or rw mode.\n");
+    return;
+  }
   //CREATE BUF TO PRINT TO SCREEN
   if (nBytes > oftp->mptr->inode.i_size)
     nBytes = oftp->mptr->inode.i_size;

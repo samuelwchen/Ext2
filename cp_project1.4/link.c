@@ -267,7 +267,7 @@ void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     debugMode("refCount = %d", mip->refCount);
     if (mip->refCount != 1)
     {
-      printf("Directory being used by %d other programs.  Cannot delete.\n", mip->refCount - 1);
+      printf("Directory being used by %d other programs.  Abort unlink.\n", mip->refCount - 1);
       return;
     }
 
