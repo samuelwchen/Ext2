@@ -103,6 +103,7 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);
 void my_mkdir(PROC *running, MINODE *pip, char *new_name);
 int enter_name(MINODE *pip, int new_ino, char *new_name);
+int mkFileHelper(int dev,int level_indirection, int *block_num, MINODE *pmip, int new_ideal_len, int new_name_len, char *new_name, int new_ino);
 int enter_name_helper(MINODE *pip, int *i_block_ptr, int new_ideal_len, int new_name_len, char *new_name, int new_ino);
 void pwd(int dev, MINODE* mip);
 int pwdHelper(int dev, MINODE* mip, char pathname[DEPTH][NAMELEN]);
@@ -142,6 +143,7 @@ void rmDirEntry(int dev, MINODE* pmip, MINODE* mip);
 void _link(int dev, PROC* running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE]);
 void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[NAMELEN]);
 void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathname_arr[DEPTH][NAMELEN]);
+void readLink (int dev, PROC* running, char sym_pathname_arr[DEPTH][NAMELEN]);
 int readSymLink(int dev, PROC* running, MINODE *mip);
 void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 

@@ -65,14 +65,6 @@ void getChildFileName(char new_pathname_arr[DEPTH][NAMELEN], char new_filename[N
 
 void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathname_arr[DEPTH][NAMELEN])
 {
-  //CHECKING THE OLD AND NEW PATH NAMES ARE CORRECT
-  printf("***new_pathname: \"");
-  for (int j = 0; j < DEPTH && strcmp(new_pathname_arr[j], "\0") != 0; j++ )
-  {
-    printf("%s/", new_pathname_arr[j]);
-  }
-  printf("\"\n");
-  printf("****old_pathname: \"%s\"", old_pathname);
   char old_pathname_cp[BLKSIZE];
   strcpy(old_pathname_cp, old_pathname);//parse function changes old_pathname
 
@@ -157,7 +149,7 @@ void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathn
       strcat(old_pathname_cp, "/");
       strcat(old_pathname_cp, old_pathname_arr[i]);
     }
-    printf("_symlink(): Old absolute pathname: %s", old_pathname_cp);
+    printf("Linked to pathname: %s\n", old_pathname_cp);
   }
 
   //INSERT OLD_PATHNAME INTO THE DATABLOCK FOR I_BLOCK[0]
@@ -199,22 +191,22 @@ void readLink (int dev, PROC* running, char sym_pathname_arr[DEPTH][NAMELEN])
     char pathname_arr[DEPTH][NAMELEN];
     get_block(mip->dev, mip->inode.i_block[0], pathname);
 
-    iput(mip);
     //PARSE PATHNAME
-    parse(pathname, pathname_arr);
+    //parse(pathname, pathname_arr);
 
     //GET LAST FILENAME
-    char filename[NAMELEN] = {'\0'};
+    //char filename[NAMELEN] = {'\0'};
     char linkname[NAMELEN] = {'\0'};
-    getChildFileName(pathname_arr, filename);
+    //getChildFileName(pathname_arr, filename);
     getChildFileName(sym_pathname_arr, linkname);
 
-    printf("%s -> %s", linkname, filename);
+    printf("%s -> %s\n", linkname, pathname);
   }
   else
   {
     debugMode("readLink(): NOT A SYMLINK\n");
   }
+  iput (mip);
 }
 
 int readSymLink(int dev, PROC* running, MINODE *mip)

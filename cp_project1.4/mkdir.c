@@ -171,15 +171,8 @@ int enter_name(MINODE *pip, int new_ino, char *new_name)
   DIR *dp = NULL;
   char dp_buf[BLKSIZE];
 
-  char indirect1_blk_buf[BLKSIZE];
-  char indirect2_blk_buf[BLKSIZE];
-  char indirect3_blk_buf[BLKSIZE];
-  int *indirect1_blk_ptr = NULL;
-  int *indirect2_blk_ptr = NULL;
-  int *indirect3_blk_ptr = NULL;
-
   int name_entered = 0;
-  for (int i = 0; i < 13; i++)//only direct blocks at the moment
+  for (int i = 0; i < 15; i++)//only direct blocks at the moment
   {
     //GET DATABLOCK NUMBER - this will change when we add indirect blocks
     if(i < 12)
@@ -188,27 +181,46 @@ int enter_name(MINODE *pip, int new_ino, char *new_name)
       if (name_entered == 1)
         return 1;
     }
-    else if (i >= 12 && i < 13)
+    else
     {
-      printf("*** Indirect blocks haven't been tested! Beware! ***\n");
-      // WALKS THROUGH INODE_TABLE [12 TO 14] (INDIRECT BLOCKS)
-      debugMode("At i_block[%d] = %d\n",index, pip->inode.i_block[i]);
-
-      //GET INDIRECT BLOCK
-      get_block(pip->dev, pip->inode.i_block[i], indirect1_blk_buf);
-      indirect1_blk_ptr = (int *)indirect1_blk_buf;
-
-      //WALK THROUGH INDIRECT BLOCK
-      while (indirect1_blk_ptr < (int*)(indirect1_blk_buf + BLKSIZE) )
-      {
-        name_entered = enter_name_helper(pip, indirect1_blk_ptr, new_ideal_len, new_name_len, new_name, new_ino);
-        if (name_entered == 1)
-          return 1;
-        indirect1_blk_ptr++;
-      }
+      // LEAVING DIRECT BLOCKS.  LOOKING AT LEVEL OF INDIRECTION
+      if (pip->inode.i_block[i] == 0)
+        break;
+      name_entered = mkFileHelper(pip->dev, i-11, &(pip->inode.i_block[i]), pip,new_ideal_len, new_name_len, new_name, new_ino);
+      if (name_entered == 1)
+        return 1;
     }
   }
   return 0;
+}
+int mkFileHelper(int dev,int level_indirection, int *block_num, MINODE *pmip, int new_ideal_len, int new_name_len, char *new_name, int new_ino)
+{
+  char buf[BLKSIZE];
+  get_block(dev, *block_num, buf);
+  int *pIndirect_blk = (int*)buf;
+  DIR *dp = (DIR*)buf;
+  DIR *prevdp = NULL;
+  int name_entered = 0;
+
+  if (level_indirection == 0)
+  {
+    name_entered = enter_name_helper(pmip, (block_num), new_ideal_len, new_name_len, new_name, new_ino );
+    if (name_entered == 1)
+      return 1;
+    else
+      return 0;
+  }
+  else
+  {
+
+    for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
+    {
+      if (*pIndirect_blk != 0)
+        return mkFileHelper(dev, level_indirection - 1, pIndirect_blk, pmip, new_ideal_len, new_name_len, new_name, new_ino);
+      else
+        return 0;
+    }
+  }
 }
 /********
 helper function for name_enter

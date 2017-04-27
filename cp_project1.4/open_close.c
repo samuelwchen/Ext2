@@ -58,7 +58,7 @@ int open_file(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char mode[B
   int ino =  getino(dev, running, pathname);
   if (ino == 0)
   {
-    printf("Invalid file.  Aborting open.");
+    printf("Invalid file.  Aborting open.\n");
     return -1;
   }
   MINODE *mip = iget(dev, ino);

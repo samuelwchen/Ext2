@@ -250,8 +250,10 @@ int main (int argc, char *argv[])
       fillItUp2(fd, running);
     else if (!strcmp(cmd, "addSingle"))
       addSingleEntryBlock(fd, running);
-      else if (!strcmp(cmd, "smin"))
-        showMinode();
+    else if (!strcmp(cmd, "smin"))
+      showMinode();
+    else if (!strcmp(cmd, "readLink"))
+      readLink(fd, running, pathname);
     else
       printf("command %s was not recognized.\n\n", cmd);
 

@@ -305,7 +305,7 @@ void fillItUp2(int dev, PROC* running)
   char numbuf[NAMELEN];
   char *cp = NULL;
 
-  for (int i = 0; i < 50; i++)
+  for (int i = 0; i < 500; i++)
   {
     strcpy(buf, "newdirectoryhereajsdhfkldjsfjkahsfkjhfkjhajsfkhsaklfhksdfhkadfhashfdkashdfkasfdhakfdhjakhdfjkvnasdkjcakjnsckajsdkjnadfkhjfaiuehaihdkjahsdfkjahskjdncsajkdnckasjncdkasjdnckjasndfckjfnkjsafdhkjashdfkajshfdauwehakjsdnkjcnaksjdfhfkajhsdfkj");
 
