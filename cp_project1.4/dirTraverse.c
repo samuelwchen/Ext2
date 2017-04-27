@@ -260,6 +260,75 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   printf("========================================================\n");
   iput(mip);
 }
+
+void ls2(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
+{
+  debugMode("ls()\n");
+  int ino = 0;
+  MINODE *mip = NULL;
+  DIR *dp = NULL;
+  char dirName[NAMELEN];
+
+  printf("ls(): running: %d\n", running->cwd->ino);
+  mip = pathnameToMip(dev, running, pathname);
+  printf("ls(): running: %d\n", running->cwd->ino);
+  if (mip == NULL)
+    return;
+
+  printInode(&(mip->inode));     // testing purposes
+
+  printf("========================== ls ==========================\n");
+  printf("Name\tPermissions\tLink\tSize\t\n");
+  int i = 0, j = 0;
+  char buf[BLKSIZE];
+  MINODE* childmip = NULL;
+  while(mip->inode.i_block[i] != 0 && i < 15)
+  {
+    get_block(dev, mip->inode.i_block[i], buf);
+    dp = (DIR *)buf;
+
+    // PRINTING READ, WRITE, EXECUTABLE PERMISSIONS, FILE/DIR NAME
+    while (dp < (DIR*)(buf + BLKSIZE))
+    {
+      childmip = iget(dev, dp->inode);
+      for (j = 0; j < dp->name_len; j++)
+      {
+        dirName[j] = dp->name[j];
+      }
+      dirName[j] = '\0';
+      printf("%s\n", dirName);
+
+      printf( (S_ISDIR(childmip->inode.i_mode)) ? "\td" : "\t-");
+      printf( (childmip->inode.i_mode & S_IRUSR) ? "r" : "-");
+      printf( (childmip->inode.i_mode & S_IWUSR) ? "w" : "-");
+      printf( (childmip->inode.i_mode & S_IXUSR) ? "x" : "-");
+      printf( (childmip->inode.i_mode & S_IRGRP) ? "r" : "-");
+      printf( (childmip->inode.i_mode & S_IWGRP) ? "w" : "-");
+      printf( (childmip->inode.i_mode & S_IXGRP) ? "x" : "-");
+      printf( (childmip->inode.i_mode & S_IROTH) ? "r" : "-");
+      printf( (childmip->inode.i_mode & S_IWOTH) ? "w" : "-");
+      printf( (childmip->inode.i_mode & S_IXOTH) ? "x" : "-");
+      printf("%d\t", childmip->inode.i_links_count);
+      printf("%d\n", childmip->inode.i_size);
+
+      // commented this line out because ls will create word wrap
+      //printf("%s\t", ctime(&(childmip->inode.i_ctime)));
+
+
+
+      printf("\tCreate time :: %s", ctime((time_t*)&(childmip->inode.i_ctime)));
+      printf("\tModify time :: %s", ctime((time_t*)&(childmip->inode.i_mtime)));
+      printf("\tAccess time :: %s", ctime((time_t*)&(childmip->inode.i_atime)));
+
+      dp = (DIR*)((char*)dp + dp->rec_len);
+
+      iput(childmip);
+    }
+    i++;
+  }
+  printf("========================================================\n");
+  iput(mip);
+}
 /**************************************************
 Precondition :: none
 Info :: changes directory.

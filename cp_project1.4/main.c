@@ -169,6 +169,8 @@ int main (int argc, char *argv[])
       pwd(fd, running->cwd);
     else if (!strcmp(cmd, "ls"))
       ls(fd, running, pathname);
+    else if (!strcmp(cmd, "ls2"))
+      ls2(fd, running, pathname);
     else if (!strcmp(cmd, "cd"))
       cd(fd, running, pathname);
     else if(!strcmp(cmd, "mkdir"))

@@ -96,6 +96,7 @@ int search (int dev, MINODE *mip, char *name);
 int searchHelper(int dev, int level_indirection, int block_num, char *name);
 MINODE* pathnameToMip(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+void ls2(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
 //found in MKDIR.C
