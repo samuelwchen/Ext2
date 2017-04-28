@@ -8,7 +8,7 @@ void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldP
   MINODE *old_mip = pathnameToMip(dev, running, oldPathNameArray);
 
   // CHECK TO SEE IF TARGET FILE EXISTS AND IS VALID TO BE MOVED
-    if (NULL == old_mip)
+  if (NULL == old_mip)
   {
     printf("Target path does not exist.  Aborting mv.\n");
     return;
@@ -37,6 +37,13 @@ void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldP
 
   MINODE *new_mip = pathnameToMip(dev, running, newPathNameArray);
 
+  if (NULL == new_mip)
+  {
+    printf("Target path does not exist.  Aborting mv.\n");
+    iput(old_mip);
+    return;
+  }
+
   if(!S_ISDIR(new_mip->inode.i_mode))
   {
     printf("Not a valid pathname.  Cannot create link.  Aborting mv.\n");
@@ -61,7 +68,7 @@ void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldP
   new_mip->dirty = 1;
   iput(new_mip);
   iput(old_mip);
-  _unlink(dev, running, oldPathNameArray);
+  _unlinkSmall(dev, running, oldPathNameArray);
   return;
 }
 

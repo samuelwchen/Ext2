@@ -133,10 +133,15 @@ int isDirEmpty(int dev, MINODE* mip);
 void rmEndFile(int dev, DIR* dp, DIR* prevdp, int block_num, char buf[BLKSIZE]);
 void rmFileHelper(int dev, int level_indirection, int block_num, MINODE *pmip, MINODE *mip);
 void freeBlockHelper(int dev, int level_indirection, int block_num);
+void freeBlockHelperUnlink(int dev, int level_indirection, int block_num);
 void rmOnlyFile(int dev, MINODE *pmip, int *iblockToChange);
 void rmMiddleFile(int dev, DIR *dp, int block_num, char buf[BLKSIZE]);
 void findLastIblock(int dev, int level_indirection, int block_num, int* lastValidBlock);
 void rmDirEntry(int dev, MINODE* pmip, MINODE* mip);
+void rmDirEntryUnlink(int dev, MINODE* pmip, MINODE* mip);
+void rmEndFileUnlink(int dev, DIR* dp, DIR* prevdp, int block_num, char buf[BLKSIZE]);
+void rmOnlyFileUnlink(int dev, MINODE *pmip, int *iblockToChange);
+void rmMiddleFileUnlink(int dev, DIR *dp, int block_num, char buf[BLKSIZE]);
 
 
 //LINK.C
@@ -146,6 +151,7 @@ void _symlink(int dev, PROC *running, char old_pathname[BLKSIZE], char new_pathn
 void readLink (int dev, PROC* running, char sym_pathname_arr[DEPTH][NAMELEN]);
 int readSymLink(int dev, PROC* running, MINODE *mip);
 void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
+void _unlinkSmall(int dev, PROC *running, char pathname[DEPTH][NAMELEN]);
 
 // create .c
 void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN]);

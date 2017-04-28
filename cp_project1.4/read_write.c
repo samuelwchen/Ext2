@@ -94,41 +94,79 @@ int bnoFromOffset(OFT *fd, int lbk)
     int level_1_i = (lbk - (256 + 12)) / 256;
     int level_2_i = (lbk - (256 + 12)) % 256;
 
-    char d_indirect_buf[BLKSIZE] = {'\0'};
-
-    // checking if i_block[13] needs a a block
+    // CHECKING IF I_BLOCK[13] NEEDS A A BLOCK
     if (fd->mptr->inode.i_block[13] == 0)
     {
       fd->mptr->inode.i_block[13] = balloc(fd->mptr->dev);
-      get_block(fd->mptr->dev, fd->mptr->inode.i_block[13], d_indirect_buf);
+      get_block(fd->mptr->dev, fd->mptr->inode.i_block[13], buf);
     }
     else
     {
-      get_block(fd->mptr->dev, fd->mptr->inode.i_block[13], d_indirect_buf);
+      get_block(fd->mptr->dev, fd->mptr->inode.i_block[13], buf);
     }
 
-    doubleIndirectPtr = (int *)d_indirect_buf + level_1_i;
+    // GOING INTO DOUBLY INDIRECT BLOCK
+    doubleIndirectPtr = (int *)buf + level_1_i;
+
+    int di_bno = *doubleIndirectPtr;// storing where doubly indierct pointing to (we'll need this for later)
+
     if(*doubleIndirectPtr == 0)
     {
-      *doubleIndirectPtr = balloc(fd->mptr->dev);
-      put_block(fd->mptr->dev, fd->mptr->inode.i_block[13], d_indirect_buf);
+      di_bno = *doubleIndirectPtr = balloc(fd->mptr->dev);
+      put_block(fd->mptr->dev, fd->mptr->inode.i_block[13], buf);
       get_block(fd->mptr->dev, *doubleIndirectPtr, buf);
-
     }
     else
     {
       get_block(fd->mptr->dev, *doubleIndirectPtr, buf);
     }
 
+    // GOING INTO SINGLY INDIRECT BLOCK
     indirectPtr = (int *)buf + level_2_i;
-
     if(*indirectPtr == 0)
-    {
       *indirectPtr = balloc(fd->mptr->dev);
-    }
-    put_block(fd->mptr->dev, *doubleIndirectPtr, buf);
+    put_block(fd->mptr->dev, di_bno, buf);
 
     return *indirectPtr;
+
+    // int level_1_i = (lbk - (256 + 12)) / 256;
+    // int level_2_i = (lbk - (256 + 12)) % 256;
+    //
+    // char d_indirect_buf[BLKSIZE] = {'\0'};
+    //
+    // // checking if i_block[13] needs a a block
+    // if (fd->mptr->inode.i_block[13] == 0)
+    // {
+    //   fd->mptr->inode.i_block[13] = balloc(fd->mptr->dev);
+    //   get_block(fd->mptr->dev, fd->mptr->inode.i_block[13], d_indirect_buf);
+    // }
+    // else
+    // {
+    //   get_block(fd->mptr->dev, fd->mptr->inode.i_block[13], d_indirect_buf);
+    // }
+    //
+    // doubleIndirectPtr = (int *)d_indirect_buf + level_1_i;
+    // if(*doubleIndirectPtr == 0)
+    // {
+    //   *doubleIndirectPtr = balloc(fd->mptr->dev);
+    //   put_block(fd->mptr->dev, fd->mptr->inode.i_block[13], d_indirect_buf);
+    //   get_block(fd->mptr->dev, *doubleIndirectPtr, buf);
+    //
+    // }
+    // else
+    // {
+    //   get_block(fd->mptr->dev, *doubleIndirectPtr, buf);
+    // }
+    //
+    // indirectPtr = (int *)buf + level_2_i;
+    //
+    // if(*indirectPtr == 0)
+    // {
+    //   *indirectPtr = balloc(fd->mptr->dev);
+    // }
+    // put_block(fd->mptr->dev, *doubleIndirectPtr, buf);
+    //
+    // return *indirectPtr;
   }
 }
 

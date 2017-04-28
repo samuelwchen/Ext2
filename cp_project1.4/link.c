@@ -270,7 +270,46 @@ void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   else
     pmip = iget(dev, getino(dev, running, pathname));
 
-
   rmDirEntry(dev, pmip, mip);
+}
 
+void _unlinkSmall(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
+{
+
+  MINODE* mip = pathnameToMip(dev, running, pathname);
+  MINODE* pmip = NULL;
+  char filename[NAMELEN];
+  getChildFileName(pathname, filename);
+
+  if (mip == NULL)
+    return;
+
+  // WE HAVE PATH and FILENAME
+
+  // CHECKING IF DIRECTORY IS VALID FOR DELETION
+  if (mip == 0)
+  {
+    printf("No such directory.\n");
+    return;
+  }
+  // MUST BE DIR, not file of symlink
+  if (! (S_ISLNK(mip->inode.i_mode) || S_ISREG(mip->inode.i_mode)))
+  {
+    printf("%s is not a file or symlink.\n", filename);
+    return;
+  }
+  if (mip->refCount != 1)
+  {
+    printf("Directory being used by %d other programs.  Abort unlink.\n", mip->refCount - 1);
+    return;
+  }
+
+  // DELETION NOW POSSIBLE.  PREPARING TO DELETE
+
+  if (strcmp(pathname[0], "\0") == 0)
+    pmip = iget(dev, running->cwd->ino);
+  else
+    pmip = iget(dev, getino(dev, running, pathname));
+
+  rmDirEntryUnlink(dev, pmip, mip);
 }
