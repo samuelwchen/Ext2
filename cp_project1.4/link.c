@@ -243,25 +243,27 @@ void _unlink(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   if (mip == NULL)
     return;
 
-    // CHECKING IF DIRECTORY IS VALID FOR DELETION
-    if (mip == 0)
-    {
-      printf("No such directory.\n");
-      return;
-    }
+  // WE HAVE PATHNAME 
 
-    if (! (S_ISLNK(mip->inode.i_mode) || S_ISREG(mip->inode.i_mode)))
-    {
-      printf("%s is not a file or symlink.\n", filename);
-      return;
-    }
+  // CHECKING IF DIRECTORY IS VALID FOR DELETION
+  if (mip == 0)
+  {
+    printf("No such directory.\n");
+    return;
+  }
 
-    debugMode("refCount = %d", mip->refCount);
-    if (mip->refCount != 1)
-    {
-      printf("Directory being used by %d other programs.  Abort unlink.\n", mip->refCount - 1);
-      return;
-    }
+  if (! (S_ISLNK(mip->inode.i_mode) || S_ISREG(mip->inode.i_mode)))
+  {
+    printf("%s is not a file or symlink.\n", filename);
+    return;
+  }
+
+  debugMode("refCount = %d", mip->refCount);
+  if (mip->refCount != 1)
+  {
+    printf("Directory being used by %d other programs.  Abort unlink.\n", mip->refCount - 1);
+    return;
+  }
 
 
   // DELETION NOW POSSIBLE.  PREPARING TO DELETE

@@ -146,7 +146,6 @@ int main (int argc, char *argv[])
   while (1)
   {
     sanitizePathname(pathname);
-    //pwd(fd, running->cwd);
     getInput(cmd, pathname, old_pathname);
     if (!strcmp(cmd, "test"))
     {

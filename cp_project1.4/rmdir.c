@@ -45,6 +45,8 @@ void rmDir (int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   debugMode("refCount = %d", mip->refCount);
   if (mip->refCount != 1)
   {
+    // if (mip->refCount < 1)
+    //   refCount = 0
     printf("Directory being used by %d other programs.  Cannot delete.\n", mip->refCount - 1);
     iput(mip);
     return;

@@ -55,9 +55,6 @@ int search (int dev, MINODE *mip, char *name)
   u32 iblock;
   int i = 0;
 
-  //printf("Name of file to find == %s\n", name);
-  //printInode(&(mip->inode));
-
   // WALKS THROUGH INODE_TABLE [0 TO 11] (DIRECT BLOCKS)
   for (int index = 0; index < 12; index++)    // defend against table[12, 13, 14]
   {
@@ -109,7 +106,6 @@ int search (int dev, MINODE *mip, char *name)
 }
 
 /**************************************************
-TODO: fix so it searches by name
 Precondition :: all ints must of non-negative.
 Info :: Gets called by search.  recursively searches through
 indirect blocks until block number of interest is found.
@@ -122,6 +118,7 @@ int searchHelper(int dev, int level_indirection, int block_num, char *name)
 
   get_block(dev, block_num, buf);
 
+  // BASE CASE
   if (level_indirection == 0)
   {
     DIR *dp = (DIR*)buf;
@@ -147,14 +144,14 @@ int searchHelper(int dev, int level_indirection, int block_num, char *name)
     return 0;
   }
 
-  //getting the indirect block
-
+  // RECURSIVE ELEMENT - GETTING THE INDIRECT BLOCK
   int *pIndirect_blk = (int*)buf;      //points to the array of block numbers
   int target_inode = 0;
+
   // WALKING THROUGH ALL THE BLOCK NUMBERS IN A BLOCK.
   for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
   {
-    if (*pIndirect_blk == 0)
+    if (*pIndirect_blk == 0)    // short circuit to break when we hit 0 blocks
       return 0;
     target_inode = searchHelper(dev, level_indirection-1, *pIndirect_blk, name);
     if (target_inode != 0)
@@ -168,13 +165,15 @@ MINODE* pathnameToMip(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   MINODE* mip = NULL;
   int ino = 0;
 
+  // IF ROOT DIRECTORY, SET STARTING MIP TO 2
   if ( !strcmp(pathname[0], "/") )
      mip = iget(dev, 2);
+  // ELSE USE CWD
   else
      mip = iget(running->cwd->dev, running->cwd->ino);
 
-  // convert pathname to (dev, ino);
-  // get a MINODE *mip pointing at a minode[ ] with (dev, ino);
+  // CONVERT PATHNAME TO (DEV, INO);
+  // GET A MINODE *MIP POINTING AT A MINODE[ ] WITH (DEV, INO);
   if (!(pathname[0][0] == '\0'))
   {
     ino = getino(mip->dev, running, pathname);
@@ -205,6 +204,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   DIR *dp = NULL;
   char dirName[NAMELEN];
 
+  // FINDING MINODE OF DIR
   printf("ls(): running: %d\n", running->cwd->ino);
   mip = pathnameToMip(dev, running, pathname);
   printf("ls(): running: %d\n", running->cwd->ino);
@@ -240,16 +240,12 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
       printf("%d\t", childmip->inode.i_links_count);
       printf("%d\t", childmip->inode.i_size);
 
-      // commented this line out because ls will create word wrap
-      //printf("%s\t", ctime(&(childmip->inode.i_ctime)));
-
       for (j = 0; j < dp->name_len; j++)
       {
         dirName[j] = dp->name[j];
       }
       dirName[j] = '\0';
       printf("%s\n", dirName);
-
 
       dp = (DIR*)((char*)dp + dp->rec_len);
 
@@ -261,6 +257,7 @@ void ls(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   iput(mip);
 }
 
+// SHOWS CREATION TIME
 void ls2(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 {
   debugMode("ls()\n");
@@ -311,11 +308,6 @@ void ls2(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
       printf("%d\t", childmip->inode.i_links_count);
       printf("%d\n", childmip->inode.i_size);
 
-      // commented this line out because ls will create word wrap
-      //printf("%s\t", ctime(&(childmip->inode.i_ctime)));
-
-
-
       printf("\tCreate time :: %s", ctime((time_t*)&(childmip->inode.i_ctime)));
       printf("\tModify time :: %s", ctime((time_t*)&(childmip->inode.i_mtime)));
       printf("\tAccess time :: %s", ctime((time_t*)&(childmip->inode.i_atime)));
@@ -342,6 +334,7 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   char buf[BLKSIZE];
   char dirName[NAMELEN];
 
+  // DETERMINES IF ABSOLUTE OR ROOT AND RETURNS APPROPRIATE STARTING MINODE
   if ( !strcmp(pathname[0], "/") )
   {
      mip = iget(dev, 2);
@@ -356,8 +349,8 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     mip = iget(running->cwd->dev, running->cwd->ino);
   }
 
-  // convert pathname to (dev, ino);
-  // get a MINODE *mip pointing at a minode[ ] with (dev, ino);
+  // CONVERT PATHNAME TO (DEV, INO) byt traversing path from starting INODE
+  // GET A MINODE *MIP POINTING AT A MINODE[ ] WITH (DEV, INO);
   ino = getino(mip->dev, running, pathname);
   if (ino == 0)
   {
@@ -371,6 +364,7 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
 
   printf("mip->inode.i_mode = %d\n", mip->inode.i_mode);
 
+  // CHECK IF SYMLINK, IF SO GO TO ITS INODE NUMBER
   if(S_ISLNK(mip->inode.i_mode))
   {
     printf("Trying to cd into a symlink\n");
@@ -379,12 +373,16 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
     iput(mip);
     mip = iget(tempDev, ino);
   }
+
+  // CHECK IF TARGET IS DIRECTORY
   if(!S_ISDIR(mip->inode.i_mode))
   {
     printf("Not a Directory\n");
     iput(mip);
     return;
   }
+
+  // PUT AWAY OLD CWD AND SET TO NEW CWD TO NEW INODE
   iput(running->cwd);
   running->cwd = iget(mip->dev, mip->ino);
   iput(mip);
@@ -392,12 +390,19 @@ void cd(int dev, PROC *running, char pathname[DEPTH][NAMELEN])
   return;
 }
 
+/***************************************************************************
+Prints out pathname of CWD.
+***************************************************************************/
 void pwd(int dev, MINODE* mip)
 {
+  // GET PATHNAME AS AN ARRAY
   printf("\n");
   char pathname[DEPTH][NAMELEN];
-  pwdHelper(dev, mip, pathname);
+  sanitizePathname(pathname);
+  pwdHelper(dev, mip, pathname);      // this func finds the pathname and puts it in an array
   int i = 0;
+
+  // ITERATE THROUGH ARRAY AND PRINT OU THE RESULTING PATHNAME
   while(pathname[i][0] != '\0')
   {
     if (i == 0)
@@ -409,18 +414,24 @@ void pwd(int dev, MINODE* mip)
   printf("\n");
 }
 
+/***************************************************************************
+Recursively finds the pathname
+***************************************************************************/
 int pwdHelper(int dev, MINODE* mip, char pathname[DEPTH][NAMELEN])
 {
+  // BASE CASE
   if (mip->ino == 2)
   {
     strcpy(pathname[0], "/");
     return 1;
   }
-  // GETTING PARENT mip
-  int pino = search(dev, mip, "..");
-  MINODE* pmip = iget(dev, pino);
-  int i = pwdHelper(dev, pmip, pathname);
 
+  // RECURSIVE STEP: GETTING PARENT mip
+  int pino = search(dev, mip, "..");      // go up one level
+  MINODE* pmip = iget(dev, pino);
+  int i = pwdHelper(dev, pmip, pathname);  // recursion
+
+  // PUT INO'S NAME INTO ARRAY
   char fileName[NAMELEN] = {'\0'};
   getNameFromIno(dev, mip->ino, fileName);
   strcpy(pathname[i], fileName);
@@ -527,7 +538,7 @@ void getNameFromIno(int dev, int ino, char fileName[NAMELEN])
       {
         printf("File FOUND.  Inode # = %d, name = %s\n", dp->inode, fileName);
         printf("--------------------------------------------------------\n");
-
+        iput(mip);
         return;
       }
 

@@ -1,5 +1,8 @@
 #include "project.h"
 
+/*****************************************************************************
+Similar to mkdir
+******************************************************************************/
 void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
 {
   //GET NEW FILE NAME
@@ -20,18 +23,22 @@ void create(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
     return;
   }
 
-  //CALL CREATE_HELPER
+  //CALL CREATE_HELPER (sets of INODE's initial values)
   createHelper(running, pmip, filename);
 
   //INCREMENT LINKS COUNT
   pmip->inode.i_links_count++;
+
   //WRITE CHANGES BACK TO MEMORY
   pmip->dirty = 1;
+  iput(pmip);
   //mip->dirty = 1;
   //iput(mip);
-  iput(pmip);
 }
 
+/*****************************************************************************
+Sets the initial values in INODE that was called by CREATE
+******************************************************************************/
 void createHelper(PROC *running, MINODE *pmip, char *filename)
 {
   //GET INO AND BNO (AND CHECK IF SPACE IS AVAILABLE)

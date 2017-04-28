@@ -2,6 +2,7 @@
 
 void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BLKSIZE])
 {
+  //CHECKS TO SEE IF 4 NUMBERS READER IN
   if (strlen(value) != 4)
   {
     printf("\n--------------------------------------------------\n");
@@ -11,6 +12,7 @@ void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BL
 
   int permissions[4] = {0};
 
+  // CHECK IF NUMBER READ ARE VALID (0-7)
   for(int i = 0; i < 4; i++)
   {
     if (value[i] - '0' >= 0 && value[i] - '0' <= 7)
@@ -25,6 +27,7 @@ void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BL
     }
   }
 
+  //GET MINODE (SEE IF PATH EXISTS)
   int ino = getino(dev, running, pathname);
   MINODE *mip = iget(dev, ino);
 
@@ -36,15 +39,18 @@ void _chmod(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char value[BL
     return;
   }
 
+  // GET MODE AND BIT SHIFT TO CLEAR 12 bits
   int tempMode = (int)(mip->inode.i_mode);
   tempMode = tempMode >> 12;
 
+  // ADDING THE OCTALS with OR
   for (int i = 0; i < 4; i++)
   {
     tempMode = tempMode << 3;
     tempMode = tempMode | permissions[i];
   }
 
+  // PUT NEW PERMISSIONS BACK
   mip->inode.i_mode = (u16)tempMode;
   mip->dirty = 1;
   iput(mip);

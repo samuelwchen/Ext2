@@ -29,6 +29,7 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   }
   printf("\n");
 
+  // FINDING MINODE OF PARENT THAT WILL HOLD DIRECTORY NAME
   int pino = 0;
   MINODE *pip = NULL;
   if(i == 0)
@@ -50,7 +51,7 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
   }
   else
   {
-    //GET MINODE OF PARENT DIRECTORY
+    // FINALLY GET MINODE OF PARENT DIRECTORY
     pino = getino(mip->dev, running, pathname);
     pip = iget(mip->dev, pino);
   }
@@ -79,16 +80,19 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
 
   //CALL MY_MKDIR
   my_mkdir(running, pip, new_dir_name);
+
   //INCREMENT LINKS COUNT
   pip->inode.i_links_count++;
+
   //WRITE CHANGES BACK TO MEMORY
   pip->dirty = 1;
   mip->dirty = 1;
   iput(mip);
   iput(pip);
 }
-
+/*************************************************************************
 //Precondition: pip is a dir
+*************************************************************************/
 void my_mkdir(PROC *running, MINODE *pip, char *new_name)
 {
   //GET INO AND BNO (AND CHECK IF SPACE IS AVAILABLE)
@@ -153,9 +157,14 @@ void my_mkdir(PROC *running, MINODE *pip, char *new_name)
   //add name to parent's directry
   enter_name(pip, ino, new_name);
 }
+
+/*************************************************************************
 //entername enters a new directy entry in the parent's datablock
 // returns
 // 1 on sucess and 0 on failure
+
+// ENTER NAME FINS THE BLOCK TO ADD ENTRY  -- then calls enter name helper
+*************************************************************************/
 int enter_name(MINODE *pip, int new_ino, char *new_name)
 {
   //CALCULATING IDEAL_LENGTH OF NEW RECORD
@@ -187,12 +196,16 @@ int enter_name(MINODE *pip, int new_ino, char *new_name)
       if (pip->inode.i_block[i] == 0)
         break;
       name_entered = mkFileHelper(pip->dev, i-11, &(pip->inode.i_block[i]), pip,new_ideal_len, new_name_len, new_name, new_ino);
-      if (name_entered == 1)
+      if (name_entered == 1)  // NAME SUCCESSFULLY ENTERED!
         return 1;
     }
   }
   return 0;
 }
+/*************************************************************************
+/ Walks through the indirect blocks untile level of indirection is 0.
+THen you are in the direct blocks.  Modyfiying direct block if necesary
+*************************************************************************/
 int mkFileHelper(int dev,int level_indirection, int *block_num, MINODE *pmip, int new_ideal_len, int new_name_len, char *new_name, int new_ino)
 {
   char buf[BLKSIZE];
@@ -202,17 +215,19 @@ int mkFileHelper(int dev,int level_indirection, int *block_num, MINODE *pmip, in
   DIR *prevdp = NULL;
   int name_entered = 0;
 
+  // BASE CASE
   if (level_indirection == 0)
   {
     name_entered = enter_name_helper(pmip, (block_num), new_ideal_len, new_name_len, new_name, new_ino );
-    if (name_entered == 1)
+    if (name_entered == 1)  // NAME SUCCESSULLY ENTERED!
       return 1;
     else
       return 0;
   }
+
+  // RECURSIVE STEP
   else
   {
-
     for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
     {
       if (*pIndirect_blk != 0)
