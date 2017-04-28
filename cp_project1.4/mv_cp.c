@@ -67,7 +67,6 @@ void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldP
 
 void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldPath[BLKSIZE])
 {
-
   char oldPathNameArray[DEPTH][NAMELEN];
   parse(oldPath, oldPathNameArray);
   MINODE *old_mip = pathnameToMip(dev, running, oldPathNameArray);
@@ -99,6 +98,13 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
   // CHECK TO SEE IF NEW FILENAME IS ALREADY TAKEN
   char new_filename[NAMELEN] = {'\0'};
   getChildFileName(newPathNameArray, new_filename);
+
+  // CHECK TO SEE IF THE NEW FILE NAME IS ""
+  if(!strcmp(new_filename, "") || new_filename[0] == '\0')
+  {
+    printf("Cannot copy to a file name \"\"\n");
+    return;
+  }
 
   MINODE *new_mip = pathnameToMip(dev, running, newPathNameArray);
 

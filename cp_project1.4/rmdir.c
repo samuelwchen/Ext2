@@ -89,6 +89,7 @@ void rmDirEntry(int dev, MINODE* pmip, MINODE* mip)
         break;
 
       freeBlockHelper(dev, i-11, mip->inode.i_block[i]);
+      mip->inode.i_block[i] = 0;
     }
   }
   else
@@ -223,7 +224,10 @@ void freeBlockHelper(int dev, int level_indirection, int block_num)
     for (int i = 0; i < BLKSIZE/sizeof(int); i++, pIndirect_blk++)
     {
       if (*pIndirect_blk != 0)
+      {
         freeBlockHelper(dev, level_indirection - 1, *pIndirect_blk);
+        *pIndirect_blk = 0;
+      }
       else
         return;
     }

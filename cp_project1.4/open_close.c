@@ -14,7 +14,10 @@ void _truncate(MINODE *mip)
     for (int i = 0; i < 12; i++)
     {
       if (mip->inode.i_block[i] != 0)
+      {
         bdealloc(mip->dev, mip->inode.i_block[i]);
+        mip->inode.i_block[i] = 0;
+      }
       else
         break;
     }
@@ -25,6 +28,7 @@ void _truncate(MINODE *mip)
         break;
 
       freeBlockHelper(mip->dev, i-11, mip->inode.i_block[i]);
+      mip->inode.i_block[i] = 0;
     }
   }
   else

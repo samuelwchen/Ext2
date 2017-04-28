@@ -85,22 +85,17 @@ int incFreeBlocks(int dev)
   printf("-----------------------------------------\n");
 }
 
-/******************************************
-precondition:
-info: DECREMENT free blocks in SUPER and GD
-******************************************/
 int decFreeInodes(int dev)
 {
   char buf[BLKSIZE];
 
-  // DEC FREE BLOCKS COUNT IN SUPER
+  // dec free blocks count in SUPER and GD
   get_block(dev, 1, buf);
   SUPER *sp = (SUPER *)buf;
   sp->s_free_inodes_count--;
   put_block(dev, 1, buf);
   printf("free blocks in super = %d\n", sp->s_free_inodes_count);
 
-// DEC FREE BLOCKS COUNT IN GD
   get_block(dev, 2, buf);
   GD *gp = (GD *)buf;
   gp->bg_free_inodes_count--;
@@ -125,7 +120,6 @@ int incFreeInodes(int dev)
   put_block(dev, 2, buf);
   printf("free blocks in gd = %d\n", gp->bg_free_inodes_count);
 }
-
 /**************************************************
 Precondition :: correct dev
 Info :: Allocates a datablock and returns bno number.
@@ -186,6 +180,7 @@ Returns 0 on failure.
 **************************************************/
 int ialloc(int dev)
 {
+
   char buf[BLKSIZE] = {'\0'};
 
   // READ SUPER BLOCK
@@ -230,7 +225,6 @@ int ialloc(int dev)
   printf("ialloc(): no more free inodes\n");
   return 0;
 }
-
 /**************************************************
 Precondition ::
 Info :: clears the bit mapped to the block number
@@ -264,16 +258,13 @@ int bdealloc(int dev, int bno)
 
   // READ inode_bitmap BLOCK
   get_block(dev, bmap, buf);
-
   //CLEAR BIT IN BUF CONTAINING IMAP
   clr_bit(buf, bno - 1);
-
   // WRITE BUF BACK TO IMAP ON DEV
   put_block(dev, bmap, buf);
   incFreeBlocks(dev);
   return 1;
 }
-
 /**************************************************
 Precondition ::
 Info :: clears the bit mapped to the inode number
@@ -307,10 +298,8 @@ int idealloc(int dev, int ino)
 
   // READ inode_bitmap BLOCK
   get_block(dev, imap, buf);
-
   //CLEAR BIT IN BUF CONTAINING IMAP
   clr_bit(buf, ino - 1);
-  
   // WRITE BUF BACK TO IMAP ON DEV
   put_block(dev, imap, buf);
   incFreeInodes(dev);
