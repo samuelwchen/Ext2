@@ -1,15 +1,9 @@
 #include "project.h"
 
 /*
-* deallocates all
+* deallocates all the datablocks
 * DOES NOT IPUT(mip)
 */
-/******************************************
-precondition: link count must be 1
-postcondition: mip must be iput afterwards
-info: Deallocates all the datablocks in
-  of mip.
-******************************************/
 void _truncate(MINODE *mip)
 {
   char buf[BLKSIZE];
@@ -141,10 +135,7 @@ int open_file(int dev, PROC *running, char pathname[DEPTH][NAMELEN], char mode[B
   new_fd->mptr->dirty = 1;
   return i;
 }
-/******************************************
-precondition: buffer of the mode
-info: returns the mode number from string mode
-******************************************/
+
 int determineMode(char mode[BLKSIZE])
 {
   if (!strcmp (mode, "r") || !strcmp (mode, "R"))
@@ -157,11 +148,7 @@ int determineMode(char mode[BLKSIZE])
     return 3;
   return -1;
 }
-/******************************************
-precondition: None
-info: Prints all opened files and their mode,
-  refCount, ino, and offset
-******************************************/
+
 void pfd(int dev, PROC* running)
 {
   printf("========================= PFD ==========================\n");
@@ -172,11 +159,7 @@ void pfd(int dev, PROC* running)
   printf("--------------------------------------------------------\n");
   return;
 }
-/******************************************
-precondition: File at fd_num must be opened
-info: Frees the spot in the file descriptor
-  array at index fd_num. (Closes the file)
-******************************************/
+
 void close_file(int dev, PROC *running, int fd_num)
 {
   OFT *oftp = &( running->fd[fd_num] );

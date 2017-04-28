@@ -17,6 +17,7 @@ int _read(OFT *fd, char *buf, int nbytes)
   //WHILE THERE ARE STILL BYTES TO READ
   while (nbytes > 0 && avil > 0)
   {
+    memset(buf, '\0', BLKSIZE);
     //CALCULATE LOGICAL BLOCK NUMBER AND THE START BYTE
     int lbk = fd->offset / BLKSIZE;
     int start = fd->offset % BLKSIZE;
@@ -26,7 +27,7 @@ int _read(OFT *fd, char *buf, int nbytes)
 
     //GET DATABLOCK
     get_block(fd->mptr->dev, bno, dbuf);
-
+    
     //CALCULATE REMAINING BYTES IN BLOCK AND GET START POINTER
     remaining = BLKSIZE - start;
     avil = fd->mptr->inode.i_size - fd->offset;
@@ -114,11 +115,11 @@ int bnoFromOffset(OFT *fd, int lbk)
     {
       di_bno = *doubleIndirectPtr = balloc(fd->mptr->dev);
       put_block(fd->mptr->dev, fd->mptr->inode.i_block[13], buf);
-      get_block(fd->mptr->dev, *doubleIndirectPtr, buf);
+      get_block(fd->mptr->dev, di_bno, buf);
     }
     else
     {
-      get_block(fd->mptr->dev, *doubleIndirectPtr, buf);
+      get_block(fd->mptr->dev, di_bno, buf);
     }
 
     // GOING INTO SINGLY INDIRECT BLOCK
@@ -284,6 +285,7 @@ int _write(OFT *fd, char *buf, int nbytes)
     if (bno == 0)
     {
       bno = balloc(fd->mptr->dev);
+
       if(bno == 0)
       {
         printf("No more datablocks avialable.  Aborting write\n");
@@ -314,6 +316,7 @@ int _write(OFT *fd, char *buf, int nbytes)
     if(fd->offset >= fd->mptr->inode.i_size)
       fd->mptr->inode.i_size = fd->offset;  //offet has already been updated
   }
+
   return totalBytes;
 }
 
@@ -344,4 +347,6 @@ void screen_write(PROC *running, int fd_num, char *buf)
 
 
   _write(oftp, buf, strlen(buf));
+  // oftp->mptr->dirty = 1;
+  // iput(oftp->mptr);
 }
