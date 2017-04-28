@@ -3,10 +3,11 @@
 void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
 {
   MINODE *mip = NULL;
+
   //POINT MIP TO "STARTING" DIR
+  //ABSOLUTE
   if( !strcmp(pathname[0], "/") )
   {
-    //ABSOLUTE
     mip = iget (dev, 2);
   }
   else if (!strcmp(pathname[0], "\0"))
@@ -14,12 +15,12 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
     printf("Error: mkdir requires a pathname\n");
     return;
   }
+  //RELATIVE
   else
   {
-    //RELATIVE
     mip = iget(running->cwd->dev, running->cwd->ino);
-//    mip = running->cwd;
   }
+
   //GET NEW DIRECTORY NAME
   int i = 0;
   char new_dir_name[NAMELEN];
@@ -55,7 +56,6 @@ void _mkdir(int dev, PROC* running, char pathname[DEPTH][NAMELEN])
     pino = getino(mip->dev, running, pathname);
     pip = iget(mip->dev, pino);
   }
-
 
   //CHECK PIP IS A DIR
   if ( !S_ISDIR(pip->inode.i_mode) )
@@ -250,7 +250,6 @@ int enter_name_helper(MINODE *pip, int *i_block_ptr, int new_ideal_len, int new_
   //CHECK IF LAST OF ALLOCATED BLOCKS
   if (*i_block_ptr == 0)  //DATABLOCK HAS NO ENTRIES YET
   {
-    debugMode("...Allocating new data block");
     //ALLOCATE NEW DATABLOCK
     *i_block_ptr = balloc(pip->dev);
 

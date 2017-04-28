@@ -56,6 +56,8 @@ int bnoFromOffset(OFT *fd, int lbk)
   int *indirectPtr = NULL;
   int *doubleIndirectPtr = NULL;
   char buf[BLKSIZE] = {'\0'};
+
+  // USE MAILMAN's ALGORITHM TO FIND WHICH BNO OFFSET IS IN
   if(lbk < 12)
   {
     debugMode("NOTE: lbk < 12\n");
@@ -106,6 +108,7 @@ void printRead(PROC *running, int fd_num, int nBytes)
     printf("Invalid file descriptor chosen. File descriptor %d chosen. Aborting close.\n", fd_num);
     return;
   }
+  // CHECK IF CORRECT MODE
   if (oftp->mode != 0 && oftp->mode != 2)
   {
     printf("File in incorrect mode.  Must be r or rw mode.\n");
@@ -117,18 +120,15 @@ void printRead(PROC *running, int fd_num, int nBytes)
   if (nBytes > MAXINT)
     nBytes = MAXINT - 1;
 
-
-  //char buf[nBytes + 1];
   char buf[BLKSIZE+1];
   int bytesRead = 0;
 
-//  for (int i = 0; i < (nBytes + 1); i++)
   for (int i = 0; i < BLKSIZE+1; i++)
   {
     buf[i] = '\0';
   }
 
-
+  // KEEP READING AND PRINTING UNTIL NBYTES = 0!
   while (nBytes > 0)
   {
     int bytesReadInBlk = 0;
@@ -183,8 +183,7 @@ void _lseek(PROC *running, int fd_num, int position)
 
 int _write(OFT *fd, char *buf, int nbytes)
 {
-  //CALCULATE AVIALABLE BLOCKS
-  //int avil = fd->mptr->inode.i_size - fd->offset;
+  // CALCULATE AVIALABLE BLOCKS
   int lbk = 0;
   int start = 0;
   int totalBytes = 0;
@@ -194,18 +193,17 @@ int _write(OFT *fd, char *buf, int nbytes)
   char *cp_file_buf = file_buf;
   char *cp_buf = buf;
 
-  //WHILE THERE ARE STILL BYTES TO WRITE
-  //while (nbytes > 0 && avil > 0)
+  // WHILE THERE ARE STILL BYTES TO WRITE
   while (nbytes > 0 )
   {
-    //CALCULATE LOGICAL BLOCK NUMBER AND THE START BYTE
+    // CALCULATE LOGICAL BLOCK NUMBER AND THE START BYTE
     int lbk = fd->offset / BLKSIZE;
     int start = fd->offset % BLKSIZE;
 
-    //GET BNO FROM LBK
-    bno = bnoFromOffset(fd, lbk);
+    // GET BNO FROM LBK
+    bno = bnoFromOffset(fd, lbk);   // mailman's algorithm
 
-    //CHECK IF NEED TO ALLOCATE BLOCK
+    // CHECK IF NEED TO ALLOCATE BLOCK
     if (bno == 0)
     {
       bno = balloc(fd->mptr->dev);
@@ -216,27 +214,23 @@ int _write(OFT *fd, char *buf, int nbytes)
       }
     }
 
-    //GET DATABLOCK
+    // GET DATABLOCK
     get_block(fd->mptr->dev, bno, file_buf);
 
-    //CALCULATE REMAINING BYTES IN BLOCK AND GET START POINTER
+    // CALCULATE REMAINING BYTES IN BLOCK AND GET START POINTER
     remaining = BLKSIZE - start;
-    //avil = fd->mptr->inode.i_size - fd->offset;
 
     //CHECK WHETHER NBYTES OR REMAINING NEED TO BE READ OUT OF BUF into file_buf
     if (nbytes < remaining )
       remaining = nbytes;
-    // else if (avil < remaining && avil < nbytes)
-    //   remaining = avil;
 
-    //COPY (ACTUAL) REMAINING BYTES INTO file
+    // COPY (ACTUAL) REMAINING BYTES INTO file
     cp_file_buf = file_buf + start;  //set start pointer
     memcpy( cp_file_buf, cp_buf, remaining);
 
-    //UPDATE NBYTES, OFFSET, CP_BUF, AND TOTALBYTES
+    // UPDATE NBYTES, OFFSET, CP_BUF, AND TOTALBYTES
     put_block(fd->mptr->dev, bno, file_buf);
     fd->offset += remaining;
-    //avil -= remaining;
     nbytes -= remaining;
     totalBytes += remaining;
     cp_buf += remaining;
@@ -249,6 +243,7 @@ int _write(OFT *fd, char *buf, int nbytes)
 void screen_write(PROC *running, int fd_num, char *buf)
 {
   OFT *oftp = &( running->fd[fd_num] );
+
   //CHECK FD_num is in range
   if(fd_num < 0 || fd_num >= NFD)
   {
@@ -261,6 +256,8 @@ void screen_write(PROC *running, int fd_num, char *buf)
     printf("Invalid file descriptor chosen. File descriptor %d chosen. Aborting close.\n", fd_num);
     return;
   }
+
+  // CHECK IF IN CORRECT MODE FOR WRITING
   if (oftp->mode == 0)
   {
     printf("File in incorrect mode.  Must be w,rw, or a mode.\n");

@@ -5,11 +5,10 @@ void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldP
 
   char oldPathNameArray[DEPTH][NAMELEN];
   parse(oldPath, oldPathNameArray);
-
-  // CHECK TO SEE IF TARGET FILE EXISTS AND IS VALID TO BE MOVED
   MINODE *old_mip = pathnameToMip(dev, running, oldPathNameArray);
 
-  if (NULL == old_mip)
+  // CHECK TO SEE IF TARGET FILE EXISTS AND IS VALID TO BE MOVED
+    if (NULL == old_mip)
   {
     printf("Target path does not exist.  Aborting mv.\n");
     return;
@@ -47,10 +46,7 @@ void mv(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char oldP
   }
 
   // CHECK TO SEE IF TARGET FILE NAME ALREADY EXISTS
-
-
   int ino = search (dev, new_mip, new_filename);
-  //MINODE *old_mip = iget(dev, ino);
   if (ino != 0)
   {
     printf("Target filename already exists.  Aborting mv.\n");
@@ -74,10 +70,9 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
 
   char oldPathNameArray[DEPTH][NAMELEN];
   parse(oldPath, oldPathNameArray);
-
-  // CHECK TO SEE IF TARGET FILE EXISTS AND IS VALID TO BE MOVED
   MINODE *old_mip = pathnameToMip(dev, running, oldPathNameArray);
 
+  // CHECK TO SEE IF TARGET FILE EXISTS AND IS VALID TO BE MOVED
   if (NULL == old_mip)
   {
     printf("Target path does not exist.  Aborting mv.\n");
@@ -137,7 +132,7 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
       break;
     }
   }
-  create (dev, running, cp_newPathNameArray);     // cp2_newPathNameArray has been parsed and destroyed.  DO NOT USE AGAIN
+  create (dev, running, cp_newPathNameArray);     // cp_newPathNameArray has been parsed and destroyed.  DO NOT USE AGAIN
   ino = getino(dev, running, newPathNameArray);
 
   new_mip->dirty = 1;
@@ -177,7 +172,7 @@ void copy(int dev, PROC *running, char newPathNameArray[DEPTH][NAMELEN], char ol
   iput(new_mip);
   iput(old_mip);
 
-//close the files
+  //CLOSE THE FILES
   close_file(dev, running, new_fd);
   close_file(dev, running, old_fd);
 
